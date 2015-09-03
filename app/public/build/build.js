@@ -438,89 +438,94 @@ function loadPage (targetPage) {
 }
 'use strict';
 
-var defaultLanguage = 'zh';
-var model = model || { enquiryMap: {} };
-var troubleshooterApp = angular.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate"] )
 
-troubleshooterApp.controller( "troubleshooterController", [ '$scope', '$http', '$location', function( $scope , $http , $location ){
+var troubleshooter = {
 
-    var troubleshooter = {
+    done: function () {
+        console.log("TroubleShooter--Done");
+    },
 
-        done: function () {
-            console.log("TroubleShooter--Done");
-        },
-
-        contact: function () {
-            showOverlay('termOfService');
-            console.log($scope.enquiryHistory);
-            console.log("TroubleShooter--Contact");
-        },
-        login: function () {
-            showOverlay('login');
-            console.log("TroubleShooter--Login");
-        },
-        logout: function () {
-            showOverlay('termOfService');
-            console.log("TroubleShooter--Logout");
-        },
-        profile: function () {
-            showOverlay('profile');
-            console.log("TroubleShooter--profile");
-        }
-    };
-
-    var user = {
-        unauthenticated_user: {
-            navbarEntries: [
-                { 
-                    title: '登入',
-                    action: 'login'
-                }
-            ]
-        },
-        authenticated_user: {
-            navbarEntries: [
-                { 
-                    title: '個人資料',
-                    action: 'profile'
-                },
-                { 
-                    title: '登出',
-                    action: 'logout'
-                }
-            ]
-        }
+    contact: function () {
+        showOverlay('termOfService');
+        console.log("TroubleShooter--Contact");
+    },
+    login: function () {
+        showOverlay('login');
+        console.log("TroubleShooter--Login");
+    },
+    logout: function () {
+        showOverlay('termOfService');
+        console.log("TroubleShooter--Logout");
+    },
+    profile: function () {
+        showOverlay('profile');
+        console.log("TroubleShooter--profile");
     }
+};
 
-    function showOverlay( url ){
-        $scope.overlay_url = 'partials/' + url + '.html'; 
-        setTimeout(  window.componentHandler.upgradeDom , 100 );
-    };
-    function hideOverlay(){
-        $scope.overlay_url = '';
-    };
+var user = {
+    unauthenticated_user: {
+        navbarEntries: [
+            { 
+                title: '登入',
+                url: 'login'
+            }
+        ]
+    },
+    authenticated_user: {
+        navbarEntries: [
+            { 
+                title: '個人資料',
+                url: 'profile'
+            },
+            { 
+                title: '登出',
+                url: 'logout'
+            }
+        ]
+    }
+};
 
-    $scope.currentLanguage = defaultLanguage;
-    $scope.hideOverlay = false;
-    $scope.guide = { url: "guides/check-ip.html" };
-    $scope.enquiryHistory = [];
+var troubleshooterApp = 
+angular
+
+.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute"] )
+.config(['$routeProvider','$locationProvider', function ($routeProvider, $locationProvider) {
+    $routeProvider
+        .when('/', {
+            templateUrl: 'partials/welcome.html'
+        })
+        .when('/troubleshooter', {
+            templateUrl: 'partials/troubleshooter.html',
+            controller: 'troubleshooterController'
+        })
+        .when('/:page', {
+            templateUrl: function (param) {
+                return 'partials/' + param.page + '.html';
+            }
+        });
+    $locationProvider.html5Mode(true);
+}])
+.run(function($rootScope, $location, $timeout) {
+    $rootScope.$on('$viewContentLoaded', function() {
+        $timeout(function() {
+            componentHandler.upgradeDom();
+        },100);
+    });
+})
+
+.controller( "mainController", [ '$scope', '$http', '$location', function( $scope , $http , $location ){
+    $scope.user = user;
+    $scope.troubleshooter = troubleshooter;
     $scope.userIdentity = 'authenticated_user';
+    
+}])
 
-    $scope.chooseLanguage = function (lang) {
-        // Load the enquiry map corresponding to the specified language
-        $http.get('data/' + lang + '/issues.json').
-            success(function(enquiryMap) {
-                model.enquiryMap = enquiryMap;
-                $scope.currentEnquiry = enquiryMap["issue"];
-            }).
-            error(function() {
-              console.log('data/' + lang + '/issues.json' + " cannot be loaded!");
-            });
+.controller( "troubleshooterController", [ '$scope', '$http', '$location', function( $scope , $http , $location ){
 
-        // Update current language
-        $scope.currentLanguage = lang;
-        
-    };
+    $scope.enquiryHistory = [];
+    $scope.currentEnquiry = model.issueList.issue;
+    $scope.currentEnquiryID = 'issue';
 
     $scope.nextAction = function (action) {
         // Do the specified action
@@ -530,8 +535,11 @@ troubleshooterApp.controller( "troubleshooterController", [ '$scope', '$http', '
     $scope.nextEnquiry = function ( next, action ){	
         if( next ){
             $scope.enquiryHistory.push( $scope.currentEnquiry );
-            $scope.currentEnquiry = model.enquiryMap[ next ];
-            window.setTimeout(  window.componentHandler.upgradeDom, 100 );
+            $scope.currentEnquiryID = next;
+            $scope.currentEnquiry = model.issueList[ next ];
+            setTimeout( function () {
+               window.componentHandler.upgradeDom();
+            } , 100 );
         }
     };
 
@@ -551,47 +559,15 @@ troubleshooterApp.controller( "troubleshooterController", [ '$scope', '$http', '
             });
 
         };
-    }
-    $scope.showGuide = function (url) {
-        $scope.guide_url = url;
-        showOverlay('guide');
-    }
-
-    $scope.showOverlay = showOverlay;
-
-    $scope.hideOverlay = hideOverlay;
-
-    $scope.user = user;
+    };
+    $scope.showGuide = function (guide) {
+        $scope.guide_url = 'partials/' +  guide.url ;
+        $scope.guide_name = guide.name;
+    };
 
 }]);
 
-troubleshooterApp.controller( 'homeController', [ '$scope', function( $scope ){
-    $scope.hideOverlay = true;
-}]);
 
-
-
-/*  
-var troubleshooterApp = 
-angular
-    .module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute"] )
-    .config(['$routeProvider','$locationProvider', function ($routeProvider, $locationProvider) {
-        $routeProvider
-            .when('/', {
-                templateUrl: 'partials/welcome.html',
-            })
-            .when('/DIY', {
-                controller: 'homeController'
-            })
-            .when('/contact', {
-                templateUrl: 'partials/contact.html',
-            })
-            .when('/term_of_service', {
-                templateUrl: 'partials/termOfService.html',
-            });
-        $locationProvider.html5Mode(true);
-    }]);
-*/
 /**
  * material-design-lite - Material Design Components in CSS, JS and HTML
  * @version v1.0.4

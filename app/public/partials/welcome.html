@@ -1,24 +1,37 @@
 <style>
-#welcome li {
+#welcome .mdl-card__title { 
+    background-color: #03A9F4;
+}
+#welcome li:first-child { 
     border-bottom: 1px solid rgba(169, 160, 160, 0.33);
-    border-top: 1px solid rgba(169, 160, 160, 0.33);
 }
 </style>
-
-<div id="welcome">
-    <h1>網路有問題？</h1>
-    <ul>
-        <li >
-            <h3 class="overlay-title" ng-click="showOverlay( 'initialGuide' )">
-                <i class="material-icons">arrow_forward</i>  試試我們的疑難排解
-            </h3>
-            <p class="overlay-description">自己的網路自己修！</p>
-        </li>
-        <li >
-            <h3 class="overlay-title" ng-click="nextAction('contact');">
-                <i class="material-icons">arrow_forward</i>  直接聯絡網管
-            </h3>
-            <p class="overlay-description">請有心理準備靜待回覆～<br/>網管們不一定隨時有空！</p>
-        </li>
-    </ul>   
+<div class="mdl-card mdl-shadow--2dp" id="welcome">
+    <div class="mdl-card__title">
+        <div class="mdl-card-container">
+            <h1 class="accent">網路有問題？</h1>
+        </div>
+    </div>
+    <div class="mdl-card-container">
+        <ul >
+            <li >
+                <a href="firstGuide">
+                    <h3 class="overlay-title">
+                        <i class="material-icons">arrow_forward</i>  試試我們的疑難排解
+                    </h3>    
+                </a>
+                
+                <p class="overlay-description">自己的網路自己修！</p>
+            </li>
+            <li >
+                <a href="contact">
+                    <h3 class="overlay-title">
+                        <i class="material-icons">arrow_forward</i>  直接聯絡網管
+                    </h3>
+                </a>
+                    
+                <p class="overlay-description">請有心理準備靜待回覆～<br/>網管們不一定隨時有空！</p>
+            </li>
+        </ul>   
+    </div>
 </div>

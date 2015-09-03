@@ -8,7 +8,7 @@ module.exports = function(grunt) {
               network: ["http://*", "https://*"],
              /* cache: ['http://fonts.googleapis.com/icon?family=Material+Icons'],*/
               fallback: ["/ /offline.html"],
-              exclude: ["js/jquery.min.js"],
+              exclude: ["js/jquery.min.js","build/fonts"],
               preferOnline: true,
               timestamp: true
             },
@@ -33,7 +33,24 @@ module.exports = function(grunt) {
           }
         }
       },
+      uglify: {
+        issues: {
+          files: {
+            'build/issues.min.js': ['build/issues.js']
+          }
+        }
+      },
       concat: {
+        issues: {
+            options: {
+              banner: 'var model = model || { enquiryMap: {} };' + 
+                      'model.issueList = {',
+              footer: ' }; ',
+              stripBanners: true
+            },
+            src: [ 'data/zh/*.js' ],
+            dest: 'build/issues.js'
+        },
         js: {
             src: [
                   /* Angular.js */
@@ -41,7 +58,6 @@ module.exports = function(grunt) {
                   'bower_components/angular-route/angular-route.min.js',
                   'bower_components/angular-sanitize/angular-sanitize.min.js',
                   'bower_components/angular-animate/angular-animate.min.js',
-                  
                   /* Custom js files */
                   'js/actions.js',
                   'js/general.js', 
@@ -59,7 +75,8 @@ module.exports = function(grunt) {
                   'bower_components/material-design-lite/material.min.css',
                   'css/font.css',
                   'css/general.css',
-                  'css/layout.css'
+                  'css/layout.css',
+                  'css/animation.css'
                   ],
 
             dest: 'build/build.css',
@@ -70,7 +87,8 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-manifest');
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-cssmin');
+    grunt.loadNpmTasks('grunt-contrib-uglify');
 
-    grunt.registerTask('default', ['manifest','concat','cssmin']);
+    grunt.registerTask('default', ['manifest','concat','uglify']);
 
 };

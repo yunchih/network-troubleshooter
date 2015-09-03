@@ -469,9 +469,21 @@ th {
   font-feature-settings: 'liga';
 }
 
+
+
 body, html {
     font-size: 18px;
+    color: rgba(0,0,0,0.84);
 }
+
+h1 {
+    color: black;
+}
+
+.secondary {
+    color: rgba(0,0,0,0.55);
+}
+
 .material-icons.icon-external {
     font-size: 18px;
 }
@@ -499,33 +511,14 @@ p {
     color: #F74141;
 }
 h1.accent {
-    color: #FFE735;
+    text-shadow: 1px 1px 1px white;
 }
 .mdl-data-table__cell--non-numeric {
     padding-bottom: 12px !important;
 }
 
-.container {
-    margin: 0 auto;
-    padding: 0 6px;
-}
 
 .overlay {
-    width: 100%;
-    min-height: 100%;
-    position: absolute;
-    right: 0;
-    left: 0;
-    display: inline;
-    z-index: 3;
-    background-color: black;
-    opacity: 0.97;
-    padding: 30px 0;
-    color: white;
-    transition: opacity .3s ease .15s;
-}
-.overlay img {
-    max-width: 90%;
 }
 
 .overlay .mdl-textfield>.mdl-textfield__label {
@@ -586,7 +579,6 @@ h1.accent {
 }
 main {
     width: 100%;
-    margin-top: 25px;
 }
 
 .enquiry-history-title {
@@ -742,28 +734,7 @@ main {
     .dialog-content img {
         max-width: 100%;
     }
-    
-    .overlay {
-        padding: 0;
-    }
-
-    .overlay h1 {
-        font-size: 40px;
-    }
-
-    .overlay ul {
-        padding-left: 10px;
-    }
-    
-    .overlay-title {
-        font-size: 30px;
-    }
-
-    .overlay-description {
-    }
 }
-
-
 
 
 .slide-animate-container {
@@ -771,7 +742,7 @@ main {
 }
 
 .slide-animate.ng-enter, .slide-animate.ng-leave {
-  transition:all ease-in 500ms;
+  transition:all ease-in 2s;
 
   position: absolute;
   width: 100%;
@@ -796,16 +767,72 @@ main {
 }
 
 
+
+
+.fade-animation.ng-enter, .fade-animation.ng-leave {
+   -webkit-transition:.1s linear all;
+    transition:.1s linear all;
+}
+
+.fade-animation.ng-enter {
+  opacity: 0;
+}
+.fade-animation.ng-enter.ng-enter-active {
+  opacity: 1;
+}
+
+.fade-animation.ng-leave {
+  opacity: 1;
+}
+.fade-animation.ng-leave.ng-leave-active {
+  opacity: 0;
+}
+
+
+kbd {
+  font-size: 1em;
+  letter-spacing: 0.0625em;
+  display: inline-block;
+  padding: 3px 12px;
+  background: #fff;
+  border-radius: 0.1875em;
+  color: black;
+  text-decoration: none;
+  -moz-box-shadow: inset 0 -0.0625em 0.1875em #fff, inset 0 0 1em #fff, 0 0.0625em 0.0625em #e6e6e6, 0 0.125em 0.0625em #b3b3b3, 0 0.1875em 0.0625em gray, 0 0.0625em 0.0625em 0.0625em #999999, 0 0.0625em 0 0.125em #cccccc, 0 0.125em 0 0.125em #fff;
+  -webkit-box-shadow: inset 0 -0.0625em 0.1875em #fff, inset 0 0 1em #fff, 0 0.0625em 0.0625em #e6e6e6, 0 0.125em 0.0625em #b3b3b3, 0 0.1875em 0.0625em gray, 0 0.0625em 0.0625em 0.0625em #999999, 0 0.0625em 0 0.125em #cccccc, 0 0.125em 0 0.125em #fff;
+  box-shadow: inset 0 -0.0625em 0.1875em #fff, inset 0 0 1em #fff, 0 0.0625em 0.0625em #e6e6e6, 0 0.125em 0.0625em #b3b3b3, 0 0.1875em 0.0625em gray, 0 0.0625em 0.0625em 0.0625em #999999, 0 0.0625em 0 0.125em #cccccc, 0 0.125em 0 0.125em #fff;
+  margin: 0 5px;
+  transition: 0.2s;
+}
+
+code {
+    font-family: Consolas,Menlo,Monaco,Lucida Console,Liberation Mono,DejaVu Sans Mono,Bitstream Vera Sans Mono,Courier New,monospace,sans-serif;
+    background-color: #eee;
+    font-size: 20px;
+    color: black;
+    border-radius: 3px;
+    padding: 5px 10px;
+    margin: 0px 3px;
+}
+
+.container {
+    margin: 30px auto;
+    padding: 0 6px;
+    position: relative;
+}
+
 .mdl-layout__header-row .mdl-navigation {
 	padding-top: 5px;
 }
  .mdl-layout__header-row .mdl-navigation__link  {
 	font-size: 21px;	
-	border-bottom: 13px solid transparent;
+	border-bottom: 5px solid transparent;
+	height: 55px;
+    line-height: 50px;
 }
 
  .mdl-layout__header-row .mdl-navigation__link:hover  {
-	border-bottom: 13px solid rgb(6, 140, 2);
+	border-bottom: 5px solid rgb(6, 140, 2);
 }
 
 .mdl-layout__drawer {
@@ -815,3 +842,231 @@ main {
 .mdl-layout__drawer .mdl-navigation .mdl-navigation__link {
 	padding: 16px 40px;
 }
+
+.mdl-card {
+	width: 100%;
+	background-color: #fafafa;
+	position: absolute;
+    left: 0;
+    top: 0;
+
+}
+.mdl-card-container {
+	padding: 20px 50px;
+}
+
+.mdl-card-description {
+	margin-top: 10px;
+}
+.mdl-card-footer-button {
+	text-align: center;
+}
+
+.mdl-card-footer-button > .mdl-button {
+	padding: 20px;
+    font-size: 28px;
+}
+
+@media (max-width: 400px) {
+	h1 {
+		font-size: 40px;
+	}
+
+	h2 {
+		font-size: 33px;
+	}
+
+	h3 {
+		font-size: 25px;
+	}
+	.mdl-card-container {
+		padding: 5px 12px;
+	}
+
+	ul {
+		padding: 0;
+	}
+}
+/* leaving animations ----------------------------------------- */
+/* rotate and fall */
+@keyframes rotateFall {
+    0%      { transform: rotateZ(0deg); }
+    20%     { transform: rotateZ(10deg); animation-timing-function: ease-out; }
+    40%     { transform: rotateZ(17deg); }
+    60%     { transform: rotateZ(16deg); }
+    100%    { transform: translateY(100%) rotateZ(17deg); }
+}
+
+/* slide in from the bottom */
+@keyframes slideOutLeft {
+    to      { transform: translateX(-100%); }
+}
+
+/* rotate out newspaper */
+@keyframes rotateOutNewspaper {
+    to      { transform: translateZ(-3000px) rotateZ(360deg); opacity: 0; }
+}
+
+/* entering animations --------------------------------------- */
+/* scale up */
+@keyframes scaleUp {
+    from    { opacity: 0.3; -webkit-transform: scale(0.8); }
+}
+
+/* slide in from the right */
+@keyframes slideInRight {
+    from    { transform:translateX(100%); }
+    to      { transform: translateX(0); }
+}
+
+/* slide in from the bottom */
+@keyframes slideInUp {
+    from    { transform:translateY(100%); }
+    to      { transform: translateY(0); }
+}
+@keyframes fadeIn {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+.animation-fadeIn.ng-enter {
+  animation: none;  /*Cancel out the inheritted animation*/
+  transition: 500ms ease-in-out all;
+  opacity:0;
+}
+.animation-fadeIn.ng-enter-stagger {
+  /* this will have a 100ms delay between each successive leave animation */
+  transition-delay: 0.1s;
+
+  /* As of 1.4.4, this must always be set: it signals ngAnimate
+    to not accidentally inherit a delay property from another CSS class */
+  transition-duration: 0s;
+}
+.animation-fadeIn.ng-enter.ng-enter-active {
+  /* standard transition styles */
+  opacity:1;
+}
+.animation-slide {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+}
+.animation-slide.ng-enter,
+.animation-slide.ng-leave {
+    -webkit-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+.animation-slide.ng-enter {
+    left: 155%;
+}
+.animation-slide.ng-enter-active {
+    left: 0;
+}
+.animation-slide.ng-leave {
+    left: 0;
+}
+.animation-slide.ng-leave-active {
+    left: -155%;
+}
+
+.animation-slideDown {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+}
+.animation-slideDown.ng-enter,
+.animation-slideDown.ng-leave {
+    -webkit-transition: all 1s ease;
+    transition: all 1s ease;
+}
+.animation-slideDown.ng-enter {
+    top: -100%;
+}
+.animation-slideDown.ng-enter-active {
+    top: 0;
+}
+.animation-slideDown.ng-leave {
+    top: 0;
+}
+.animation-slide.ng-leave-active {
+    top: -100%;
+}
+
+
+
+.animation-pop.ng-hide-add {
+  -webkit-animation:0.8s hide;
+  animation:0.8s hide;
+}
+
+@keyframes hide {
+  0% {
+    opacity:1;
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.02);
+  }
+  100% { 
+    opacity:0;
+    transform: scale(0.5);
+  }
+}
+
+@-webkit-keyframes hide {
+  0% {
+    opacity:1;
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.02);
+  }
+  100% { 
+    opacity:0;
+    transform: scale(0.5);
+  }
+}
+
+
+.animation-pop.ng-hide-remove {
+  -webkit-animation:0.6s show;
+  animation:0.6s show;
+}
+
+@keyframes show {
+  0% {
+    opacity:0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% { 
+    opacity:1;
+    transform: scale(1);
+  }
+}
+
+@-webkit-keyframes show {
+  0% {
+    opacity:0;
+    transform: scale(0.5);
+  }
+  70% {
+    transform: scale(1.02);
+  }
+  100% { 
+    opacity:1;
+    transform: scale(1);
+  }
+}
+
+/*.mdl-card-animation.ng-enter           { animation: slideInRight 0.5s both ease-in; z-index: 8888; }
+.mdl-card-animation.ng-leave           { animation: slideOutLeft 0.5s both ease-in; z-index: 9999; }*/

@@ -2,6 +2,10 @@
 	#profile {
 	    text-align: center;
 	}
+
+	#username {
+		margin: 0 auto;
+	}
 	.field {
 
 	}
@@ -21,52 +25,58 @@
 		max-width: 75%;
 	}
 
-	@media screen and (max-width: 350px) {
-	    #profile .mdl-textfield__input {
-	    	text-align: center;
-	    }
+	#form-body {
+		margin-bottom: 27px
 	}
-
 	#profile #submit {
-		color: white;
-		font-size: 30px;
-		margin-top: 50px;
-		padding: 20px;
-		margin-bottom: 50px;
-		height: auto;
-		background-color: transparent;
-		border: none;
-		transition: background-color 0.3s ease-out;	
+   		font-size: 30px;
+	    padding: 20px;
+	    margin-bottom: 12px;
+	    background-color: transparent;
+	    border: none;
+	    transition: background-color 0.3s ease-out;
 	}
 
 	#profile #submit:hover {
 		background-color: rgba(158, 158, 158, 0.2);
 	}
+
+	@media screen and (max-width: 350px) {
+	    #profile .mdl-textfield__input {
+	    	text-align: center;
+	    }
+	}
 </style>
-<div id="profile">
-	<h1 class="accent" id="username">陳耘志</h1>
+<div class="mdl-card mdl-shadow--2dp" id="profile">
+	<div class="mdl-card__title">
+		<h1 class="accent" id="username">陳耘志</h1>
+	</div>
 	<form action="#">
-		<div class="field">
-			<span class="field-name">學號</span>
-			<div class="mdl-textfield mdl-js-textfield">
-				<input class="mdl-textfield__input" type="text" id="studentID" value="B03902074" />
-				<!-- ng-model -->
+		<div id="form-body">
+			<div class="field">
+				<span class="field-name">學號</span>
+				<div class="mdl-textfield mdl-js-textfield">
+					<input class="mdl-textfield__input" type="text" id="studentID" value="B03902074" />
+					<!-- ng-model -->
+				</div>
+			</div>
+			<div class="field">
+				<span class="field-name">手機</span>
+				<div class="mdl-textfield mdl-js-textfield">
+					<input class="mdl-textfield__input" type="tel" id="phone" value="0978229545"/>
+					<!-- ng-model -->
+				</div>
+			</div>	
+			<div class="field">
+				<span class="field-name">房號</span>
+				<div class="mdl-textfield mdl-js-textfield">
+					<input class="mdl-textfield__input" type="text" id="roomID" value="229B"/>
+					<!-- ng-model -->
+				</div>
 			</div>
 		</div>
-		<div class="field">
-			<span class="field-name">手機</span>
-			<div class="mdl-textfield mdl-js-textfield">
-				<input class="mdl-textfield__input" type="text" id="phone" value="0978229545"/>
-				<!-- ng-model -->
-			</div>
-		</div>	
-		<div class="field">
-			<span class="field-name">房號</span>
-			<div class="mdl-textfield mdl-js-textfield">
-				<input class="mdl-textfield__input" type="text" id="roomID" value="229B"/>
-				<!-- ng-model -->
-			</div>
-		</div>
+			
+		<div class="mdl-card-footer-button mdl-card__actions mdl-card--border"></div>
 		<input type="submit" value="更新資料" id="submit">
 	</form>
 	

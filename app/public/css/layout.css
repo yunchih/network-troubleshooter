@@ -1,13 +1,22 @@
+
+.container {
+    margin: 30px auto;
+    padding: 0 6px;
+    position: relative;
+}
+
 .mdl-layout__header-row .mdl-navigation {
 	padding-top: 5px;
 }
  .mdl-layout__header-row .mdl-navigation__link  {
 	font-size: 21px;	
-	border-bottom: 13px solid transparent;
+	border-bottom: 5px solid transparent;
+	height: 55px;
+    line-height: 50px;
 }
 
  .mdl-layout__header-row .mdl-navigation__link:hover  {
-	border-bottom: 13px solid rgb(6, 140, 2);
+	border-bottom: 5px solid rgb(6, 140, 2);
 }
 
 .mdl-layout__drawer {
@@ -16,4 +25,49 @@
 
 .mdl-layout__drawer .mdl-navigation .mdl-navigation__link {
 	padding: 16px 40px;
+}
+
+.mdl-card {
+	width: 100%;
+	background-color: #fafafa;
+	position: absolute;
+    left: 0;
+    top: 0;
+
+}
+.mdl-card-container {
+	padding: 20px 50px;
+}
+
+.mdl-card-description {
+	margin-top: 10px;
+}
+.mdl-card-footer-button {
+	text-align: center;
+}
+
+.mdl-card-footer-button > .mdl-button {
+	padding: 20px;
+    font-size: 28px;
+}
+
+@media (max-width: 400px) {
+	h1 {
+		font-size: 40px;
+	}
+
+	h2 {
+		font-size: 33px;
+	}
+
+	h3 {
+		font-size: 25px;
+	}
+	.mdl-card-container {
+		padding: 5px 12px;
+	}
+
+	ul {
+		padding: 0;
+	}
 }

@@ -1,0 +1,161 @@
+<style>
+    .enquiry-table {
+        width: 100%;
+    }
+    .enquiry-title, .enquiry-description, .answers, .nextStep, .guides {
+        padding-left: 40px;
+    }
+
+    #troubleshooter .mdl-card__title {
+        background-color: rgba(63, 81, 181, 0.35);
+    }
+    
+    #troubleshooter table {
+        padding-top: 20px;
+    }
+
+    .history-answer {
+        float: right;
+        font-weight: normal;
+        font-size: 16px;
+        color: rgba(0,0,0,0.65);
+    }
+    .mdl-data-table tbody tr {
+        transition: background-color .25s ease-in ;
+    }
+    .mdl-data-table tbody tr:hover {
+        background-color: rgba(228, 224, 224, 0.3);
+    }
+    #guide {
+        z-index: 2;
+        background-color: rgba(58, 54, 54, 0.91);;
+        color: white;
+
+    }
+
+    #guide .mdl-card__title {
+        background-color: rgba(63, 81, 181, 0.47);
+        -webkit-box-shadow: 0px 3px 7px 1px rgba(0,0,0,0.34);
+        -moz-box-shadow: 0px 3px 7px 1px rgba(0,0,0,0.34);
+        box-shadow: 0px 3px 7px 1px rgba(0,0,0,0.34);
+    }
+    #guide .mdl-card__title h1{
+        color: rgb(241, 222, 47);
+        text-shadow: 2px 2px 1px black;
+    }
+    #guide img {
+        max-width: 100%;
+    }
+
+    .faq {
+        counter-reset: faq;
+        margin: 10px 30px;
+    }
+
+    .faq-entry {
+        position: relative;
+        margin-bottom: 40px;
+    }
+    .faq .faq-entry:before {
+        content: counter(faq);
+        counter-increment: faq;
+        position: absolute;
+        left: -45px;
+        top: -4px;
+        font: bold 50px/1 Sans-Serif;
+    }
+    @media (max-width: 400px) {
+        .faq {
+            margin-right: 5px;
+        }   
+        .faq .faq-entry:before {
+            left: -36px;
+        }
+    }
+</style>
+
+<div id="troubleshooter" class="mdl-card mdl-shadow--2dp">
+    <div class="mdl-card__title">
+        <div class="mdl-card-container">
+            <h1 class="accent">疑難排解</h1>
+        </div>
+    </div>
+    <table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable enquiry-table" >
+    <tbody>
+        <tr ng-repeat=" ( index, enquiry ) in enquiryHistory" >
+            <td class="mdl-data-table__cell--non-numeric  enquiry-title enquiry-history-title" ng-click="historyBacktrack(index)">
+                <span class="history-question">
+                {{ enquiry.title }}
+                </span>
+                <span class="history-answer" ng-bind-html="enquiry.situation[ enquiry.selected.index ].answer"></span>
+            </td>
+        </tr>
+        <tr>
+            <td class="mdl-data-table__cell--non-numeric">
+                <div id="{{ currentEnquiryID }}" class="enquiry-title">
+                    <span >
+                    {{ currentEnquiry.title }}
+                    </span>
+                </div>
+                
+                <!-- Guide description -->
+                <div class="enquiry-description" ng-bind-html="currentEnquiry.enquiry" ></div>
+                
+                <!-- Optional: A list of guides -->
+                <div class="guides">
+                    <div ng-repeat="guide in currentEnquiry.guides">
+                        <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--primary"
+                                ng-click="showGuide( guide )">
+                            {{ guide.name }}
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Prompt -->
+                <div class="answers">
+                    <div class="answer animation-fadeIn" ng-repeat="(index, situation) in currentEnquiry.situation ">
+                        <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" >
+                            <input type="radio" class="mdl-radio__button" ng-model="currentEnquiry.selected"
+                                               ng-value="{{ { index:index, next:situation.next} }}" name="next" />
+                            <span class="mdl-radio__label" ng-bind-html="situation.answer"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Next Step -->
+                <div class="nextStep">
+                    <button 
+                    class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                        ng-click="currentEnquiry.nextStep ? 
+                        nextAction(currentEnquiry.nextStep.action) : 
+                        nextEnquiry(currentEnquiry.selected.next)" >
+                        {{ currentEnquiry.nextStep.message || 'Next' }}
+                    </button>
+                </div>
+                            
+            </td>
+        </tr>
+
+    </tbody>
+    </table>
+</div>
+
+<div ng-show="guide_url" id="guide" class="mdl-card mdl-shadow--2dp animation-pop">
+    
+    <div class="mdl-card__title">
+        <div class="mdl-card-container">
+            <h1>{{ guide_name }}</h1>
+        </div>
+    </div> 
+    <div class="mdl-card-container">
+        <div id="guide-description" >
+            <div ng-include="guide_url"></div>
+        </div>
+        <div id="guide-footer">
+            <button class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
+                    ng-click="guide_url = ''">
+                Got it!
+            </button>                                        
+        </div>
+    </div>
+</div>
