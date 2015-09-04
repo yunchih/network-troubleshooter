@@ -29,5 +29,9 @@
     "angular-sanitize": "~1.4.5",
     "material-design-lite": "~1.0.4",
     "normalize.css": "~3.0.3"
+  },
+  "resolutions": {
+    "angular": "1.4.5",
+    "angular-touch": "~1.4.5"
   }
 }

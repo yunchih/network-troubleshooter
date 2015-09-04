@@ -58,10 +58,13 @@ module.exports = function(grunt) {
                   'bower_components/angular-route/angular-route.min.js',
                   'bower_components/angular-sanitize/angular-sanitize.min.js',
                   'bower_components/angular-animate/angular-animate.min.js',
+                  'bower_components/angular-touch/angular-touch.min.js',
+                  'bower_components/venturocket-angular-slider/build/angular-slider.min.js',
                   /* Custom js files */
                   'js/actions.js',
                   'js/general.js', 
                   'js/troubleshooterController.js',
+                  'js/timepickerController.js',
                   /* Google MDL */
                   'bower_components/material-design-lite/material.min.js'
                   ],

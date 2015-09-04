@@ -3,7 +3,7 @@
 
 var troubleshooterApp = 
 angular
-.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute"] )
+.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute", "vr.directives.slider"] )
 .config(['$routeProvider','$locationProvider', function ($routeProvider, $locationProvider) {
     $routeProvider
         .when('/', {
@@ -64,13 +64,21 @@ angular
         }
     };
 
+    var schedule = {
+        startTime: 9.5,  /* Starts at 9 am */
+        endTime: 23.5,  /* Ends at 11 pm */
+
+        numOfDateToChooseFrom: 5,
+        numOfSchedule: 3
+    };
+
     /* A list of necessary result entry used in contact page */
     /* The name of entry must correspond to id of its ng-template */
     var resultEntries = [
-        { 
-            id: 'report',
-            title: '疑難排解報告'
-        },
+        // { 
+        //     id: 'report',
+        //     title: '疑難排解報告'
+        // },
         {
             id: 'pickTime',
             title: '有空時間'
@@ -92,6 +100,9 @@ angular
         },  
         getResultEntries: function () {
             return resultEntries;
+        },
+        getSchedule: function () {
+            return schedule;
         },
         updateUserIdentity: function (identity) {
             user.identity = identity;
@@ -147,16 +158,14 @@ angular
             return null;
     };
     $scope.getNext = function () {
-        if( $scope.resultIndex != resultNumber - 1 ){
-            console.log("Has Next");
+        if( $scope.resultIndex != resultNumber - 1 )
             return $scope.resultEntries[$scope.resultIndex + 1].title;
-        }
-        else{
-            console.log("Don't have Next");
+        else
             return null;
-        }
+        
     };
 })
+
 
 .controller( "reportController", function( $scope , $enquiryHistory ){
     $scope.enquiryExportResult = $enquiryHistory.export();

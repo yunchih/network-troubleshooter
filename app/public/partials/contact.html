@@ -1,104 +1,5 @@
-<style>
-	#contact .mdl-card__title {
-		background-color: #FFC107;
-	}
-	#contact .mdl-data-table {
-	}
-	#contact td {
-		color: rgba(0,0,0,0.66);
-	}
-	#contact td:first-child {
-		color: black;
-	}
-	
-	.result {
-	}
-	.result-title {
-		text-align: center;
-		position: relative;
-		padding-bottom: 10px;
-		border-bottom: 1px solid rgba(0,0,0,0.1);
-	}
-	
-	#noTroubleshootNotice {
-	}
-	.mdl-data-table thead tr{
-		background-color: #2196F3;
-	}
-	.mdl-data-table {
-		font-size: 15px;
-	}
-	#contact .mdl-card-footer-button {
-		text-align: right;
-	}
-	#results {
-		display: flex;
-		flex-direction: row;
-		justify-content: space-between
-	}
-	.navigation {
-		max-width: 100px;
-		display: flex;
-		cursor: pointer;
-		position: relative;
-		width: 0;
-		-webkit-transition: all 0.5s ease-in-out; 
-    	transition: all 0.5s ease-in-out;
-	}
-	.navigation.active {
-		width: 15%;
-	}
-	.navigation:hover {
-		background-color: rgba(158,158,158,0.2);
-	}
-	.navigation.hovered > .navigation-indicator {
-		transform: scale(1.1);
-	}
-	.navigation-indicator {
-		margin-top: auto; 
-		margin-bottom: auto;
-		margin-left: auto; 
-		margin-right: auto;
-		display: block;
-	    max-width: 40px;
-	    line-height: 45px;
-	    font-size: 25px;
-	    text-align: center;
-	    transition: all .2s ease-in-out;
-	}
-	.navigation-icon {
-		position: absolute;
-	    margin: auto;
-		top: 0; bottom: 0;
-	    font-size: 35px;
-	    -webkit-transition: all 0.2s ease-in-out; 
-    	transition: all 0.2s ease-in-out;
-	}
-	#navigation-icon-previous {
-		left: -50px;
-	}
-	#navigation-icon-next {
-		right: -50px;
-	}
-	.hovered > #navigation-icon-previous {
-	    left: 0;
-	}
-	.hovered > #navigation-icon-next {
-		right: 0;
-	}
-	#next {
-		border-left: 1px solid rgba(0,0,0,0.1);
-	}
-	#previous {
-		border-right: 1px solid rgba(0,0,0,0.1);
-	}
+<link rel="stylesheet" href="css/contact.css">
 
-	#result-body {
-		min-height: 400px;
-		width: 100%;
-		position: relative;
-	}
-</style>
 <div class="mdl-card mdl-shadow--2dp" id="contact">
 	<div class="mdl-card__title">
 		<div class="mdl-card-container">
@@ -106,33 +7,38 @@
 		</div>
 	</div>
 	<div id="results">
-		<div 
-			ng-class="{ active: getPrevious(), hovered: previousHovered }"
-			ng-click="gotoPreviousResult()" 
-			ng-mouseover="previousHovered = true" 
-			ng-mouseleave="previousHovered = false"
-			class="navigation" id="previous">
-			<span class="navigation-indicator">
-				{{ getPrevious() }}
-			</span>
-			<i id="navigation-icon-previous" class="material-icons navigation-icon">keyboard_arrow_left</i>
-		</div>
+		
 		<div id="result-body" >
 			<div class="animation-fadeIn" ng-include src="resultEntries[resultIndex].id">
 				
 			</div>
 		</div>
-		<div 
-			ng-class="{ active: getNext(), hovered: nextHovered }"
-			ng-click="gotoNextResult()" 
-			ng-mouseover="nextHovered = true" 
-			ng-mouseleave="nextHovered = false"
-			class="navigation" id="next">
-			<span class="navigation-indicator">
-				{{ getNext() }}
-			</span>
-			<i id="navigation-icon-next" class="material-icons navigation-icon">keyboard_arrow_right</i>
+		<div id="result-footer" >
+			<div 
+				ng-class="{ visible: getPrevious(), hovered: previousHovered }"
+				ng-click="gotoPreviousResult()" 
+				ng-mouseover="previousHovered = true" 
+				ng-mouseleave="previousHovered = false"
+				class="navigation" id="previous">
+				<i id="navigation-icon-previous" class="material-icons navigation-icon">keyboard_arrow_left</i>
+				<span class="navigation-indicator">
+					{{ getPrevious() }}
+				</span>
+				
+			</div>
+			<div 
+				ng-class="{ visible: getNext(), hovered: nextHovered }"
+				ng-click="gotoNextResult()" 
+				ng-mouseover="nextHovered = true" 
+				ng-mouseleave="nextHovered = false"
+				class="navigation" id="next">
+				<span class="navigation-indicator">
+					{{ getNext() }}
+				</span>
+				<i id="navigation-icon-next" class="material-icons navigation-icon">keyboard_arrow_right</i>
+			</div>
 		</div>
+			
 	</div>
 	
 </div>
@@ -141,10 +47,10 @@
 <script type="text/ng-template" id="report">
 
 <div class="result" ng-controller="reportController">
-	<h3 class="result-title">
+	<h3 class="panel-title">
 		疑難排解報告
 	</h3>
-	<div class="result-content">
+	<div class="panel-description">
 			<table ng-show="enquiryExportResult.length" class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
 				<!-- <div id="table-header">
 					<thead>
@@ -160,7 +66,9 @@
 				</tbody>
 		    </table>
 
-			<div id="noTroubleshootNotice" ng-hide="enquiryExportResult.length">尚未進行疑難排解</div>
+			<h3 id="noTroubleshootNotice" ng-hide="enquiryExportResult.length">您尚未進行疑難排解</h3>
+			
+
 	</div>
 </div>
 	
@@ -169,19 +77,41 @@
 
 <script type="text/ng-template" id="pickTime">
 
-<div class="result">
-	<button class="mdl-button mdl-js-button ">
-	  選擇時間
-	</button>
-	<input type="text" id="time-picker">
-	<ul class="mdl-menu  mdl-js-menu mdl-js-ripple-effect"
-	    for="time-picker">
-	  <li class="mdl-menu__item">11:30 PM</li>
-	  <li class="mdl-menu__item">11:30 PM</li>
-	  <li disabled class="mdl-menu__item">11:30 PM</li>
-	  <li class="mdl-menu__item">11:30 PM</li>
-	</ul>
+<div class="result" ng-controller="timepickerController">
+	<h3 class="panel-title">
+		請選三個您有空的時段
+	</h3>
+	<div class="panel-description">
+		<section class="schedule" ng-repeat="schedule in availableSchedules track by $index">
+			<span class="schedule-index">
+				{{ $index + 1 }}
+			</span>
+			<button id="datepicker" class="mdl-button mdl-js-button ">
+			  {{ schedule.date || '選一天' }}
+			</button>
 
+			<ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect" for="datepicker">
+			  <li class="mdl-menu__item" 
+			  	ng-repeat="condidate in dates" 
+			  	ng-click="selectDate(schedule, condidate)">
+			  		{{ condidate }}
+			  </li>
+			</ul>
+			<div class="slider-container">
+				<slider
+				    ng-model="schedule.from"
+				    ng-model-range="schedule.to"
+				    step="0.5"
+				    buffer="0.5"
+				    precision="0.5"
+				    stretch="2"
+				    translate-fn="transformTime"
+				    floor="0.0"
+				    ceiling="24.0" >
+				</slider>
+			</div>
+		</section>
+	</div>
 </div>
 
 </script>
