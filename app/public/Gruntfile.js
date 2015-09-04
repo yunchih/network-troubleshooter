@@ -62,7 +62,6 @@ module.exports = function(grunt) {
                   'js/actions.js',
                   'js/general.js', 
                   'js/troubleshooterController.js',
-                  
                   /* Google MDL */
                   'bower_components/material-design-lite/material.min.js'
                   ],
@@ -76,7 +75,7 @@ module.exports = function(grunt) {
                   'css/font.css',
                   'css/general.css',
                   'css/layout.css',
-                  'css/animation.css'
+                  'css/animation.css',
                   ],
 
             dest: 'build/build.css',

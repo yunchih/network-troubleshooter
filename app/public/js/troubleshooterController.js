@@ -1,56 +1,8 @@
 'use strict';
 
 
-var troubleshooter = {
-
-    done: function () {
-        console.log("TroubleShooter--Done");
-    },
-
-    contact: function () {
-        showOverlay('termOfService');
-        console.log("TroubleShooter--Contact");
-    },
-    login: function () {
-        showOverlay('login');
-        console.log("TroubleShooter--Login");
-    },
-    logout: function () {
-        showOverlay('termOfService');
-        console.log("TroubleShooter--Logout");
-    },
-    profile: function () {
-        showOverlay('profile');
-        console.log("TroubleShooter--profile");
-    }
-};
-
-var user = {
-    unauthenticated_user: {
-        navbarEntries: [
-            { 
-                title: '登入',
-                url: 'login'
-            }
-        ]
-    },
-    authenticated_user: {
-        navbarEntries: [
-            { 
-                title: '個人資料',
-                url: 'profile'
-            },
-            { 
-                title: '登出',
-                url: 'logout'
-            }
-        ]
-    }
-};
-
 var troubleshooterApp = 
 angular
-
 .module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute"] )
 .config(['$routeProvider','$locationProvider', function ($routeProvider, $locationProvider) {
     $routeProvider
@@ -61,6 +13,10 @@ angular
             templateUrl: 'partials/troubleshooter.html',
             controller: 'troubleshooterController'
         })
+        .when('/contact', {
+            templateUrl: 'partials/contact.html',
+            controller: 'contactController'
+        })
         .when('/:page', {
             templateUrl: function (param) {
                 return 'partials/' + param.page + '.html';
@@ -68,6 +24,12 @@ angular
         });
     $locationProvider.html5Mode(true);
 }])
+
+/*
+*
+*  Upgrade MDL Object within ng-view partial
+*
+*/
 .run(function($rootScope, $location, $timeout) {
     $rootScope.$on('$viewContentLoaded', function() {
         $timeout(function() {
@@ -76,27 +38,149 @@ angular
     });
 })
 
-.controller( "mainController", [ '$scope', '$http', '$location', function( $scope , $http , $location ){
-    $scope.user = user;
-    $scope.troubleshooter = troubleshooter;
-    $scope.userIdentity = 'authenticated_user';
-    
+.factory('$global', function(){
+
+    var userIdentity = 'authenticated_user';
+    var user = {
+        unauthenticated_user: {
+            navbarLayout: [
+                { 
+                    title: '登入',
+                    url: 'login'
+                }
+            ]
+        },
+        authenticated_user: {
+            navbarLayout: [
+                { 
+                    title: '個人資料',
+                    url: 'profile'
+                },
+                { 
+                    title: '登出',
+                    url: 'logout'
+                }
+            ]
+        }
+    };
+
+    /* A list of necessary result entry used in contact page */
+    /* The name of entry must correspond to id of its ng-template */
+    var resultEntries = [
+        { 
+            id: 'report',
+            title: '疑難排解報告'
+        },
+        {
+            id: 'pickTime',
+            title: '有空時間'
+        },
+        {
+            id: 'confirmProfile',
+            title: '聯絡方式'
+        },
+        {
+            id: 'done',
+            title: '完成'
+        }
+    ];
+
+    return {
+
+        getNavbar: function () {
+            return user[ userIdentity ].navbarLayout;
+        },  
+        getResultEntries: function () {
+            return resultEntries;
+        },
+        updateUserIdentity: function (identity) {
+            user.identity = identity;
+        }
+    };
+
+})
+
+.factory('$enquiryHistory', function(){ 
+
+    var enquiryHistory = [];
+
+    return {
+
+        update: function(history) {
+            enquiryHistory = history;
+        },
+        export: function () {
+            var enquiry, enquiryExport = [];
+            var length = enquiryHistory.length;
+            for (var i = 0; i < length ; i++) {
+                 enquiry = enquiryHistory[i];
+                 enquiryExport.push( {
+                    question: enquiry.title,
+                    answer: enquiry.situation[ enquiry.selected.index ].answer
+                });
+            };
+
+            return enquiryExport;
+        }
+    };
+})
+
+.controller( "mainController", [ '$scope', '$global', function( $scope, $global ){
+    $scope.navBarLayout = $global.getNavbar();
 }])
 
-.controller( "troubleshooterController", [ '$scope', '$http', '$location', function( $scope , $http , $location ){
+.controller( "contactController", function( $scope , $global ){
+    $scope.resultEntries = $global.getResultEntries();
+    $scope.resultIndex = 0;
+    var resultNumber = $scope.resultEntries.length;
+
+    $scope.gotoNextResult = function () {
+        $scope.resultIndex = $scope.resultIndex + 1;
+    };
+    $scope.gotoPreviousResult = function () {
+        $scope.resultIndex = $scope.resultIndex - 1;
+    };
+    $scope.getPrevious = function () {
+        if( $scope.resultIndex != 0 )
+            return $scope.resultEntries[$scope.resultIndex - 1].title;
+        else
+            return null;
+    };
+    $scope.getNext = function () {
+        if( $scope.resultIndex != resultNumber - 1 ){
+            console.log("Has Next");
+            return $scope.resultEntries[$scope.resultIndex + 1].title;
+        }
+        else{
+            console.log("Don't have Next");
+            return null;
+        }
+    };
+})
+
+.controller( "reportController", function( $scope , $enquiryHistory ){
+    $scope.enquiryExportResult = $enquiryHistory.export();
+})
+
+.controller( "troubleshooterController", function( $scope, $rootScope, $location, $enquiryHistory ){
 
     $scope.enquiryHistory = [];
     $scope.currentEnquiry = model.issueList.issue;
     $scope.currentEnquiryID = 'issue';
+    $rootScope.exportEnquiries = {};
 
-    $scope.nextAction = function (action) {
-        // Do the specified action
-        troubleshooter[action]();
+    $scope.gotoNextPage = function (url) {
+
+        // Troubleshooter is done
+        // Prepare for export
+        $enquiryHistory.update( $scope.enquiryHistory );
+        
+        $location.path(url);
     };
 
-    $scope.nextEnquiry = function ( next, action ){	
+    $scope.gotoNextEnquiry = function ( next ){	
         if( next ){
-            $scope.enquiryHistory.push( $scope.currentEnquiry );
+            $scope.enquiryHistory.push($scope.currentEnquiry);
             $scope.currentEnquiryID = next;
             $scope.currentEnquiry = model.issueList[ next ];
             setTimeout( function () {
@@ -111,21 +195,10 @@ angular
         window.setTimeout(  window.componentHandler.upgradeDom, 100 );
     };
 
-    $scope.exportEnquiries = function () {
-        var enquiry, exportJSON = [];
-        for (var i =  $scope.enquiryHistory.length - 1; i >= 0; i--) {
-             enquiry = $scope.enquiryHistory[i];
-             exportJSON.push( {
-                question: enquiry.title,
-                answer: enquiry.situation[ enquiry.selected.index ].answer
-            });
-
-        };
-    };
     $scope.showGuide = function (guide) {
         $scope.guide_url = 'partials/' +  guide.url ;
         $scope.guide_name = guide.name;
     };
 
-}]);
+});
 

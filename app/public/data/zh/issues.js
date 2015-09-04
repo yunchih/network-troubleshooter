@@ -140,7 +140,7 @@
       },
       {
         answer: "它好像有損耗的痕跡。",
-        next: "contact"
+        next: "contactSocketBroken"
       }
 
     ] 
@@ -148,9 +148,9 @@
   computerHardware: {
     title: "硬體問題",
     enquiry: "你電腦的硬體怪怪的，造成一些無法預測的問題…",
-    nextStep: {
+    nextPage: {
       message: "聯絡網管",
-      action: "contact"
+      url: "contact"
     } 
   
   },
@@ -346,7 +346,17 @@
         url: "guides/anti-virus.html"
       }
     ],
-    enquiry: "你被計中鎖了！！原因八成是中毒<br/>請裝一套防毒軟體，並對你的電腦做全身掃毒。若無防毒軟體，可以考慮使用<a  target='_blank' href='https://www.cc.ntu.edu.tw/chinese/services/serv_e04.asp'>計中提供的防毒軟體<i class='material-icons icon-external'>open_in_new</i></a>。<br/>掃完毒後，請聯絡網管。我們會幫你解鎖。如果你一天到晚被計中鎖，我們會建議你重灌。"
+    enquiry: "你被計中鎖了！！原因八成是中毒。<br/>請裝一套防毒軟體，並對你的電腦做全身掃毒。若無防毒軟體，可以考慮使用<a  target='_blank' href='https://www.cc.ntu.edu.tw/chinese/services/serv_e04.asp'>計中提供的防毒軟體<i class='material-icons icon-external'>open_in_new</i></a>。<br/>掃完毒後，請聯絡網管。我們會幫你解鎖。如果你一天到晚被計中鎖，我們會建議你重灌。",
+    situation: [
+      {
+        answer: "掃毒完成",
+        next: "cleanUpDone"
+      },
+      {
+        answer: "待會再掃",
+        next: "finish"
+      }
+    ]
   },
 
   slowSpeed: {
@@ -414,16 +424,32 @@
   contact: {
     title: "聯絡網管",
     enquiry: "看來您已經達到疑難排解的極限。您的問題還是需要網管親自解決。",
-    nextStep: {
+    nextPage: {
       message: "聯絡網管",
-      action: "contact"
+      url: "contact"
     } 
   },
   finish: {
     title: "感謝您的愛用",
-    enquiry: "希望有幫到一點小忙~",
-    nextStep: {
+    enquiry: "希望此疑難排解有幫到一點小忙~",
+    nextPage: {
       message: "Done",
-      action: "done"
+      url: "done"
+    } 
+  },
+  cleanUpDone: {
+    title: "掃毒完成",
+    enquiry: "我們會盡快幫你解鎖，完成時會立刻通知你。以後請小心下載任何程式，也不要幹壞事，<span class='emphasize'>Big Brother is Watching You!</span>",
+    nextPage: {
+      message: "聯絡網管",
+      url: "contact"
+    } 
+  },
+  contactSocketBroken: {
+    title: "網路孔壞掉",
+    enquiry: "網路孔壞掉需要專業的硬體工程師維修，我們會盡快為您聯絡。也請你以後小心使用網路孔，切莫不耐煩就硬拔亂扯。",
+    nextPage: {
+      message: "聯絡網管",
+      url: "contact"
     } 
   },

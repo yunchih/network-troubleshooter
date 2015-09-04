@@ -30,7 +30,7 @@
             <div class="mdl-layout__drawer mdl-layout--small-screen-only">
                 <span class="mdl-layout-title">選項</span>
                 <nav class="mdl-navigation">
-                    <a ng-repeat="nav in user[ userIdentity ].navbarEntries" class="mdl-navigation__link"  href="{{ nav.url }}">  
+                    <a ng-repeat="nav in navBarLayout" class="mdl-navigation__link"  href="{{ nav.url }}">  
                             {{ nav.title }}
                     </a>
                 </nav>
@@ -43,7 +43,7 @@
                     <div class="mdl-layout-spacer"></div>
 
                     <nav class="mdl-navigation mdl-layout--large-screen-only">
-                        <a ng-repeat="nav in user[ userIdentity ].navbarEntries" class="mdl-navigation__link"  href="{{ nav.url }}">  
+                        <a ng-repeat="nav in navBarLayout" class="mdl-navigation__link"  href="{{ nav.url }}">  
                             {{ nav.title }}
                         </a>
                     </nav>

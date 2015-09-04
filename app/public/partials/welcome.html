@@ -5,6 +5,20 @@
 #welcome li:first-child { 
     border-bottom: 1px solid rgba(169, 160, 160, 0.33);
 }
+
+#welcome .title {
+    display: inline-block;
+    cursor: pointer;
+    color: #FF4081;
+    transition: all .2s ease-in-out;
+}
+
+#welcome .title:hover {
+    transform: scale(1.1);
+}
+#welcome .description {
+    margin-left: 30px;    
+}
 </style>
 <div class="mdl-card mdl-shadow--2dp" id="welcome">
     <div class="mdl-card__title">
@@ -16,21 +30,21 @@
         <ul >
             <li >
                 <a href="firstGuide">
-                    <h3 class="overlay-title">
+                    <h3 class="title">
                         <i class="material-icons">arrow_forward</i>  試試我們的疑難排解
                     </h3>    
                 </a>
                 
-                <p class="overlay-description">自己的網路自己修！</p>
+                <p class="description">自己的網路自己修！</p>
             </li>
             <li >
                 <a href="contact">
-                    <h3 class="overlay-title">
+                    <h3 class="title">
                         <i class="material-icons">arrow_forward</i>  直接聯絡網管
                     </h3>
                 </a>
                     
-                <p class="overlay-description">請有心理準備靜待回覆～<br/>網管們不一定隨時有空！</p>
+                <p class="description">請有心理準備靜待回覆～<br/>網管們不一定隨時有空！</p>
             </li>
         </ul>   
     </div>

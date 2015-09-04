@@ -47,7 +47,7 @@
 
 .animation-fadeIn.ng-enter {
   animation: none;  /*Cancel out the inheritted animation*/
-  transition: 500ms ease-in-out all;
+  transition: 700ms ease-in-out all;
   opacity:0;
 }
 .animation-fadeIn.ng-enter-stagger {

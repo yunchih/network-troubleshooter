@@ -2,20 +2,79 @@
 	#service .mdl-button {
 		margin: 5px 15px;
 	}
+	
+	#service .mdl-card__title {
+		background-color: #00BD00;
+	}
+	.agreement {
+		font-size: 20px;
+	    margin-bottom: 10px;
+	    position: relative;
+	}
+
+	.agreement > i {
+		color: #00BD00;
+		position: absolute;
+	    left: 0;
+	    top: 0;
+	}
+
+	.agreement > span {
+		margin-left: 22px;
+    	display: block;
+	}
 </style>
-<div id="service">
-	<h1>Term of Service</h1>
-	<div class="content">
-		<div class='button-group'>
-			<button ng-click="nextAction('done')" class="mdl-button mdl-js-button mdl-button--raised mdl-button--accent">
-			  不同意
-			</button>
-			<button ng-click="showOverlay('contact')" class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored">
-			  同意
-			</button>
+<div class="mdl-card mdl-shadow--2dp" id="service">
+	<div class="mdl-card__title">
+		<div class="mdl-card-container">
+			<h1>一些小約定</h1>
 		</div>
-		
-	</div>	
+	</div>
+
+	<div class="mdl-card-container">
+		<ul class="mdl-card-description agreements">
+			<li class="agreement">
+				<i class="material-icons">done</i>
+				<span>
+					您的個資一律保密
+				</span>
+			</li>
+			<li class="agreement">
+				<i class="material-icons">done</i>
+				<span>
+					除了方便聯絡維修外，您的資料絕不挪作他用
+				</span>
+			</li>
+			<li class="agreement">
+				<i class="material-icons">done</i>
+				<span>
+					我們將透過您的 Facebook 聯絡您，和您約定維修時間
+				</span>
+			</li>
+			<li class="agreement">
+				<i class="material-icons">done</i>
+				<span>
+					請盡量使用本系統之疑難排解解決問題，真的無法自行解決再報修，以節省大家的時間
+				</span>
+			</li>
+			<li class="agreement">
+				<i class="material-icons">done</i>
+				<span>
+					請勿胡亂報修，情節重大者<span class="emphasize">不再提供報修服務</span>
+				</span>
+			</li>
+		</ul>
+	</div>
+	
+	<div class="mdl-card-footer-button mdl-card__actions mdl-card--border">
+		<a class="mdl-button mdl-button--colored  mdl-button--accent mdl-js-button mdl-js-ripple-effect" href="/">
+		  不同意
+		</a>
+		<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="troubleshooter">
+		  同意
+		</a>
+	</div>
+	
 </div>
 
 	
