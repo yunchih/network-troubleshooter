@@ -27,12 +27,10 @@ function populateSchedule (schedule) {
     var schedules = [];
     for (var i = schedule.numOfSchedule - 1; i >= 0; i--) {
         schedules.push({
-            from: schedule.startTime,
-            to: schedule.endTime
+            date: '',
+            scheduleSliderString: schedule.startTime.toString() + ';' + schedule.endTime.toString()
         });
     };
-    console.log(schedule);
-    console.log( (schedules[0].from).toString());
 
     return schedules;
 }
@@ -45,6 +43,12 @@ function formatTime (time) {
         PMorAM: hour >= 12 ? 'PM' : 'AM'
     };
 }
+
+function transformTime(time) {
+    var formattedTime = formatTime(time);
+    return  formattedTime.hour + ':' + formattedTime.minute + ' ' + formattedTime.PMorAM
+};
+
 angular
 .module( "networkTroubleshooter")
 .controller( "timepickerController", [ '$scope', '$global', function( $scope, $global ){
@@ -52,22 +56,19 @@ angular
     var schedule = $global.getSchedule();
 
     $scope.selectDate = function (_schedule, selectedDate) {
-        _schedule.date = selectedDate;
+        _schedule['date'] = selectedDate;
     };
-    $scope.transformTime = function (time) {
-        var formattedTime = formatTime(time);
-        return  formattedTime.hour + ':' + formattedTime.minute + ' ' + formattedTime.PMorAM
-        if( time > 12 ) {
-            time = time - 12;
-            return ' PM' + time.toString();
-        }
-        return ' AM' + time.toString();
-    };
+    
     $scope.dates = populateNextFewDays(schedule.numOfDateToChooseFrom);
     $scope.availableSchedules = populateSchedule(schedule);
-    $scope.timeSlider = {
-        from: schedule.startTime,
-        to: schedule.endTime
+    $scope.scheduleSliderOptions = {
+        from: 0,
+        to: 24,
+        step: 0.5,
+        round: 1,
+        skin: 'round' ,
+        scale: [ {val: 6,label:'早上'}, {val: 12, label:'中午'}, {val: '18', label:'傍晚'}],
+        modelLabels: transformTime
     }
 
 }]);

@@ -105,82 +105,16 @@
 	text-align: center;
 }
 
-
-slider {
-	display:     block;
-	position:    relative;
-	height:      15px;
-	width:       500px;
-}
-slider span.bar {
-	height: 4px;
-    z-index: 0;
-    background: #eee;
-    top: 0;
-    bottom: 0;
-    margin-top: auto;
-    margin-bottom: auto;
-}
-slider span.bar.selection, slider span.bar.unselected {
-}
-slider span.bar.selection {
-	background: #3f51b5;
-	opacity:    0.5;
-}
-slider span.bar.unselected {
-	width:      auto;
-	background: gray;
-	opacity:    0.5;
-}
-slider span.pointer {
-	cursor:           pointer;
-	width:            15px;
-	height:            15px;
-	border-radius: 15px;
-	top:              0;
-	bottom:           0;
-	background-color: #3f51b5;
-	z-index: 2;
-}
-slider span.pointer:hover {
-}
-slider span.pointer.active {
-}
-slider span.bubble {
-	font-size:   0.7em;
-	line-height: 1.4em;
-	font-family: sans-serif;
-	text-align:  center;
-	text-shadow: none;
-	top:         -1.3em;
-	cursor:      pointer;
-}
-slider span.bubble.selection, slider span.bubble.limit {
-}
-slider span.bubble.selection {
-	display: none !important;
-}
-slider span.bubble.limit {
-}
-slider span.bubble.low, slider span.bubble.high {
-}
-.slider-container {
-	-webkit-touch-callout: none;
-	-webkit-user-select:   none;
-	-khtml-user-select:    none;
-	-moz-user-select:      -moz-none;
-	-ms-user-select:       none;
-	user-select:           none;
-}
-::-ms-tooltip {
-	display: none;
-}
-
 .schedule {
 	display: flex;
 	flex-flow: row wrap;
-	justify-content: center;
-	margin-bottom: 45px;
+	justify-content: flex-start;
+	border-top: 1px solid rgba(0,0,0,0.1);
+	height: 200px;
+}
+
+.panel-description {
+	padding-top: 0;
 }
 
 .schedule-index {
@@ -191,5 +125,36 @@ slider span.bubble.low, slider span.bubble.high {
 }
 
 .schedule > button {
-	margin: 0 20px;
+	margin: auto 10%;
 }
+
+.jslider {
+	min-width: 300px;
+	width: 70%;
+	margin: auto;
+}
+
+.jslider div.jslider-value {
+	background: #fafafa;
+	font-size: 15px;
+}
+
+.datepicker-container {
+	width: 20%;
+	text-align: center;
+	border-right: 1px solid rgba(0,0,0,0.1);
+}
+
+.datepicker {
+	line-height: 200px;
+    height: 200px;
+    width: 100%;
+    font-size: 25px;
+    transition: transform .22s ease-in-out;
+    background-color: transparent !important;
+}
+
+.datepicker:hover {
+	transform: scale(1.1);
+}
+

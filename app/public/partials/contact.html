@@ -83,33 +83,20 @@
 	</h3>
 	<div class="panel-description">
 		<section class="schedule" ng-repeat="schedule in availableSchedules track by $index">
-			<span class="schedule-index">
-				{{ $index + 1 }}
-			</span>
-			<button id="datepicker" class="mdl-button mdl-js-button ">
-			  {{ schedule.date || '選一天' }}
-			</button>
-
-			<ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect" for="datepicker">
+			<div class="datepicker-container">
+				<button id="datepicker_{{$index}}" class="mdl-button datepicker">
+				  {{ schedule['date'] || '請選一天' }}
+				</button>
+			</div>
+			<ul class="mdl-menu mdl-js-menu mdl-js-ripple-effect" for="datepicker_{{$index}}">
 			  <li class="mdl-menu__item" 
-			  	ng-repeat="condidate in dates" 
-			  	ng-click="selectDate(schedule, condidate)">
-			  		{{ condidate }}
+			  	ng-repeat="condidateDate in dates" 
+			  	ng-click="selectDate(schedule, condidateDate)">
+			  		{{ condidateDate }}
 			  </li>
 			</ul>
-			<div class="slider-container">
-				<slider
-				    ng-model="schedule.from"
-				    ng-model-range="schedule.to"
-				    step="0.5"
-				    buffer="0.5"
-				    precision="0.5"
-				    stretch="2"
-				    translate-fn="transformTime"
-				    floor="0.0"
-				    ceiling="24.0" >
-				</slider>
-			</div>
+			
+			<input class="timepicker" ng-model="schedule.scheduleSliderString" type="text" slider options="scheduleSliderOptions" />
 		</section>
 	</div>
 </div>

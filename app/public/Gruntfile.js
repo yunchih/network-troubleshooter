@@ -58,8 +58,7 @@ module.exports = function(grunt) {
                   'bower_components/angular-route/angular-route.min.js',
                   'bower_components/angular-sanitize/angular-sanitize.min.js',
                   'bower_components/angular-animate/angular-animate.min.js',
-                  'bower_components/angular-touch/angular-touch.min.js',
-                  'bower_components/venturocket-angular-slider/build/angular-slider.min.js',
+                  'bower_components/angular-awesome-slider/dist/angular-awesome-slider.min.js',
                   /* Custom js files */
                   'js/actions.js',
                   'js/general.js', 
@@ -75,6 +74,7 @@ module.exports = function(grunt) {
             src: [
                   'bower_components/normalize.css/normalize.css',
                   'bower_components/material-design-lite/material.min.css',
+                  'bower_components/angular-awesome-slider/dist/css/angular-awesome-slider.min.css',
                   'css/font.css',
                   'css/general.css',
                   'css/layout.css',

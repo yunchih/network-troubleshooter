@@ -3,7 +3,7 @@
 
 var troubleshooterApp = 
 angular
-.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute", "vr.directives.slider"] )
+.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute", "angularAwesomeSlider"] )
 .config(['$routeProvider','$locationProvider', function ($routeProvider, $locationProvider) {
     $routeProvider
         .when('/', {

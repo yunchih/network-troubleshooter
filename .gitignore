@@ -4,3 +4,4 @@ bower_components/*
 app/public/bower_components
 app/public/node_modules
 node_modules
+app/public/build
