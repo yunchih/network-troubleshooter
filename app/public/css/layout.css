@@ -1,4 +1,7 @@
-
+html, body {
+    height: 100%;
+    margin: 0px;
+}
 .container {
     margin: 30px auto;
     padding: 0 6px;

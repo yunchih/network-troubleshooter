@@ -17,6 +17,7 @@
     position: relative;
     padding: 15px;
     margin: 0;
+    color: rgba(0,0,0,0.7);
     background-color:  #FFA907;
     border-top: 1px solid rgba(0,0,0,0.35);
 	border-bottom: 1px solid rgba(0,0,0,0.2);
@@ -35,6 +36,7 @@
 }
 .navigation {
 	opacity: 0;
+	visibility: hidden;
 	cursor: pointer;
 	text-align: center;
 	display: flex;
@@ -45,12 +47,14 @@
 	-webkit-transition: opacity .5s, transform .1s, width .1s;
 }
 .navigation.visible {
-	opacity: 1
+	opacity: 1;
+	visibility: visible;
 }
 .navigation:hover {
 	background-color: rgba(158,158,158,0.2);
+	
 }
-.navigation.hovered {
+.navigation.hovered > .navigation-indicator {
 	transform: scale(1.1);
 }
 
@@ -141,14 +145,13 @@
 
 .datepicker-container {
 	width: 20%;
-	text-align: center;
 	border-right: 1px solid rgba(0,0,0,0.1);
+	display: flex;
+  	justify-content: center;
+  	flex-direction: column;
 }
 
 .datepicker {
-	line-height: 200px;
-    height: 200px;
-    width: 100%;
     font-size: 25px;
     transition: transform .22s ease-in-out;
     background-color: transparent !important;
@@ -158,3 +161,49 @@
 	transform: scale(1.1);
 }
 
+#profile {
+	display: flex;
+	flex-flow: column wrap;
+	margin-top: 45px;
+}
+.field-name {
+	margin-right: 20px;
+    font-size: 25px;
+    color: #FF9E51;
+    display: inline-block;
+}
+
+.field {
+	margin: auto;
+}
+#profile .mdl-textfield.is-focused > .mdl-textfield__input  {
+	border-color: #FF9E51;
+}
+
+#profile .mdl-textfield {
+	max-width: 75%;
+}
+
+@media screen and (max-width: 350px) {
+    #profile .mdl-textfield__input {
+    	text-align: center;
+    }
+}
+
+
+#done-panel .panel-description {
+	margin: auto;
+	font-size: 45px;
+}
+
+#done-panel .panel-title {
+	font-size: 45px;
+	background-color: rgba(111, 216, 111, 0.68);
+}
+#done-panel .panel-title > .material-icons {
+	color: green;
+}
+
+#done-panel .material-icons {
+	font-size: 45px
+}

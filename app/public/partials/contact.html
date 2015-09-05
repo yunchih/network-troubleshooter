@@ -38,9 +38,7 @@
 				<i id="navigation-icon-next" class="material-icons navigation-icon">keyboard_arrow_right</i>
 			</div>
 		</div>
-			
 	</div>
-	
 </div>
 
 
@@ -67,8 +65,6 @@
 		    </table>
 
 			<h3 id="noTroubleshootNotice" ng-hide="enquiryExportResult.length">您尚未進行疑難排解</h3>
-			
-
 	</div>
 </div>
 	
@@ -104,9 +100,48 @@
 </script>
 
 <script type="text/ng-template" id="confirmProfile">
-	profile
+
+
+<div class="result" >
+	<h3 class="panel-title">
+		請確認個人資料
+	</h3>
+	<div class="panel-description">
+		<div id="profile">
+			<div class="field">
+				<span class="field-name">學號</span>
+				<div class="mdl-textfield mdl-js-textfield">
+					<input class="mdl-textfield__input" type="text" id="studentID" value="B03902074" />
+				</div>
+			</div>
+			<div class="field">
+				<span class="field-name">手機</span>
+				<div class="mdl-textfield mdl-js-textfield">
+					<input class="mdl-textfield__input" type="tel" id="phone" value="0978229545"/>
+				</div>
+			</div>	
+			<div class="field">
+				<span class="field-name">房號</span>
+				<div class="mdl-textfield mdl-js-textfield">
+					<input class="mdl-textfield__input" type="text" id="roomID" value="229B"/>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
 </script>
 
 <script type="text/ng-template" id="done">
-	完成
+<div class="result" id="done-panel">
+	<h3 class="panel-title">
+		<i class="material-icons">done</i> 
+		完成
+	</h3>
+	<div class="panel-description">
+		<i class="material-icons">send</i>
+		<span>送出</span>
+	</div>
+</div>
 </script>
