@@ -382,6 +382,16 @@ b?(B="leave",f="afterLeave"):(B="before"+b.charAt(0).toUpperCase()+b.substr(1),f
 window.angular);
 //# sourceMappingURL=angular-animate.min.js.map
 
+/*
+ AngularJS v1.4.5
+ (c) 2010-2015 Google, Inc. http://angularjs.org
+ License: MIT
+*/
+(function(p,g,l){'use strict';function m(b,a,f){var c=f.baseHref(),k=b[0];return function(b,d,e){var f,h;e=e||{};h=e.expires;f=g.isDefined(e.path)?e.path:c;d===l&&(h="Thu, 01 Jan 1970 00:00:00 GMT",d="");g.isString(h)&&(h=new Date(h));d=encodeURIComponent(b)+"="+encodeURIComponent(d);d=d+(f?";path="+f:"")+(e.domain?";domain="+e.domain:"");d+=h?";expires="+h.toUTCString():"";d+=e.secure?";secure":"";e=d.length+1;4096<e&&a.warn("Cookie '"+b+"' possibly not set or overflowed because it was too large ("+
+e+" > 4096 bytes)!");k.cookie=d}}g.module("ngCookies",["ng"]).provider("$cookies",[function(){var b=this.defaults={};this.$get=["$$cookieReader","$$cookieWriter",function(a,f){return{get:function(c){return a()[c]},getObject:function(c){return(c=this.get(c))?g.fromJson(c):c},getAll:function(){return a()},put:function(c,a,n){f(c,a,n?g.extend({},b,n):b)},putObject:function(c,b,a){this.put(c,g.toJson(b),a)},remove:function(a,k){f(a,l,k?g.extend({},b,k):b)}}}]}]);g.module("ngCookies").factory("$cookieStore",
+["$cookies",function(b){return{get:function(a){return b.getObject(a)},put:function(a,f){b.putObject(a,f)},remove:function(a){b.remove(a)}}}]);m.$inject=["$document","$log","$browser"];g.module("ngCookies").provider("$$cookieWriter",function(){this.$get=m})})(window,window.angular);
+//# sourceMappingURL=angular-cookies.min.js.map
+
 /** 
 * @license angular-awesome-slider - v2.4.1
 * (c) 2013 Julien VALERY https://github.com/darul75/angular-awesome-slider
@@ -638,37 +648,68 @@ angular.module('ngFacebook', [])
 
 var troubleshooterApp = 
 angular
-.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute","ngFacebook", "angularAwesomeSlider"] )
-.config(['$routeProvider','$locationProvider','$facebookProvider', function ($routeProvider, $locationProvider, $facebookProvider) {
+.module( "networkTroubleshooter", [
+    "ngSanitize", 
+    "ngAnimate", 
+    "ngRoute",
+    "ngFacebook", 
+    "ngCookies",
+    "angularAwesomeSlider"] )
+.config(['$routeProvider','$locationProvider','$httpProvider', '$facebookProvider', function ($routeProvider, $locationProvider, $httpProvider, $facebookProvider) {
 
-    $facebookProvider.setAppId(475318909316785);
+    $facebookProvider
+        .setAppId(475318909316785);
 
     $routeProvider
         .when('/', {
             templateUrl: 'partials/welcome.html'
-        })
-        .when('/troubleshooter', {
-            templateUrl: 'partials/troubleshooter.html',
-            controller: 'troubleshooterController'
-        })
-        .when('/contact', {
-            templateUrl: 'partials/contact.html',
-            controller: 'contactController'
-        })
-        .when('/login', {
-            templateUrl : 'partials/login.html',
-            controller: 'loginController',
+            resolve: {
+                UserProfile: function (User) {
+                    return User.getProfile();                    
+                }
+            }
         })
         .when('/:page', {
             templateUrl: function (param) {
                 return 'partials/' + param.page + '.html';
             }
         });
+
+    $httpProvider.interceptors.push(['$q', '$location', 'Session', function ($q, $location, Session) {
+        return {
+            'request': function (config) {
+                /*
+                    Attach JWT Token to every outgoing request
+                */
+                config.headers = config.headers || {};
+                if (Session.token) {
+                    config.headers.Authorization = 'Bearer ' + Session.token;
+                }
+                return config;
+            },
+            'responseError': function (rejection) {
+                /* 
+                    The user is accessing restricted API or his API has expired 
+                */
+                if (rejection.status === 401 || rejection.status === 403) {
+                    if( User.hasLoggedIn() ){
+                        Session.destroy();
+                        $location.path('/signin');
+                    }
+                    else {
+                        $location.path('/');
+                    }
+                        
+                }
+                return $q.reject(rejection);
+            }
+        };
+    }]);
     $locationProvider.html5Mode(true);
 }])
 
 
-.run(function($rootScope, $location, $timeout) {
+.run(function($rootScope, $location, $timeout, Request, Session, User) {
 
 /*
 *
@@ -703,10 +744,16 @@ angular
         // Insert the Facebook JS SDK into the DOM
         firstScriptElement.parentNode.insertBefore(facebookJS, firstScriptElement);
     }());
-
+/*
+*
+*  Loads user data by utilizing the web token stored in cookies
+*  If the web token has not expired, it will load the profile successfully
+*  
+*/ 
+    
 })
-
-.controller( "mainController", [ '$scope', 'UserIdentity', function( $scope,  UserIdentity ){
+        
+.controller( "mainController", [ '$scope', 'UserProfile', function( $scope,  UserProfile, UserIdentity ){
 
     var navbarLayout = {};
 
@@ -730,7 +777,8 @@ angular
     $scope.navBar = navbarLayout;
 
     $scope.currentUser = {
-        identity: UserIdentity.unauthenticatedUser
+        // User.getIdentity(UserProfile) 
+        identity:  UserIdentity.unauthenticatedUser
     };
 
     $scope.enquiryHistory = [];
@@ -815,55 +863,92 @@ angular
 .factory('Request',['$http', 'API', function($http, API){
 
 	var apiURL = [ API.base , API.version, API.user.prefix ].join('/');
-	
+
 	return {
+		getJWT: function (fbID) {
+			return $http.get( apiURL + '?fb_id=' + fbID );
+		},
 		getUserProfile: function () {
 			return $http.get( apiURL + API.GetUserProfile );
 		},
 		getSingleUserProfile: function (prop, value) {
-			return $http.get( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/') );
+			// return $http.get( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/') );
 		},
 		updateUserProfile: function (query) {
 			return $http.post( apiURL + API.UpdateUserProfile, query );
 		},
 		updateSingleUserProfile: function (query, prop, value) {
-			return $http.post( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/'), query );
+			// return $http.post( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/'), query );
 		}
 	};
 }]);
 angular
 .module( "networkTroubleshooter")
-.service("Session", function () {
+.factory("Session", function ($cookieStore) {
 	
-	this.create = function (webToken, userId, userRole) {
-		this.token = webToken;
-		this.userId = userId;
-		this.userRole = userRole;
-	};
-	this.destroy = function () {
-		this.token = null;
-		this.userId = null;
-		this.userRole = null;
-	};
+	var token = $cookieStore.get('token');
+	var userId = $cookieStore.get('id');
+	var profilePromise = null;
+
+	return {
+		getToken: function () {
+			return this.token || $cookieStore.get('token');
+		},
+		getID: function () {
+			return this.userId || $cookieStore.get('id');
+		},
+		storeProfile: function ( _profilePromise ) {
+			profilePromise = _profilePromise;
+		}, 
+		getProfile: function () {
+			var actualProfile = {};
+			profilePromise.then(function () {
+				
+			})
+		}
+		create: function (webToken, userId) {
+			this.token = webToken;
+			this.userId = userId;
+			$cookieStore.put('token',webToken);
+			$cookieStore.put('id',userId);
+		},
+		destroy: function () {
+			this.token = null;
+			this.userId = null;
+			$cookieStore.remove('token');
+			$cookieStore.remove('id');
+		}
+	}
+		
+		
 });
 angular
 .module( "networkTroubleshooter")
-.factory('User', ['$facebook', 'UserIdentityConfig', function( $facebook, UserIdentityConfig ){
+.factory('User', ['$facebook', 'UserIdentity', 'Session', function( $facebook, UserIdentity, Session ){
     
-    var userIdentity = 'unauthenticated_user';
-
-    var loadAuthenticatedUser = function () {
-    	
-    };
-
+    var authenticated = false;
+    var profilePromise = undefined;
+    var profile = null;
     return {
-    	login: function () {
-    		$facebook.login().then(function() {
-		    	loadAuthenticatedUser();
-		    });
-    	},
-        updateUserIdentity: function (identity) {
-        	userIdentity = identity;
+    	hasLoggedIn: function () {
+            return loggedIn;  
+        },
+        getIdentity: function (_profile) {
+        	return _profile ? UserIdentity.unauthenticatedUser : UserIdentity.unauthenticatedUser;
+        },
+        getProfile: function() {
+            if(!profilePromise || !authenticated) {
+                profilePromise = Request.getUserProfile().then(
+                function(response) {
+                    authenticated = true;
+                    profile = response.data;
+                    return profile;
+                },function(rejection) {  // error
+                    authenticated = false;
+                    return $q.reject(rejection);
+                });
+            }
+            return profilePromise;
         }
     };
 
@@ -939,10 +1024,25 @@ angular
 	function getUserFacebookInfo () {
 		$facebook.api("/me").then( 
 			function(response) {
-				Request.getUserProfile(response.id).then(
+
+				var data = { identity: UserIdentity.authenticatedUser };
+
+				angular.extend(data, response);
+				
+				$scope.setCurrentUser(data);
+
+			},
+			function(err) {
+				$location.path('/');
+			}
+		);
+		/*
+		$facebook.api("/me").then( 
+			function(response) {
+				Request.getJWT(response.id).then(
 				// OK
-				function () {
-					
+				function (res) {
+
 				}, 
 				// Error
 				function () {
@@ -953,6 +1053,7 @@ angular
 				$location.path('/');
 			}
 		);
+*/
 	}
 		
 	$scope.FBLogin = function () {
@@ -1095,7 +1196,7 @@ angular
 }]);
 angular
 .module( "networkTroubleshooter")
-.controller( "troubleshooterController", function( $scope, $location, EnquiryHistory ){
+.controller( "troubleshooterController", function( $scope, $location ){
 
     $scope.currentEnquiry = model.issueList.issue;
     $scope.currentEnquiryID = 'issue';

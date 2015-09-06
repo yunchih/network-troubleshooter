@@ -5,10 +5,25 @@ angular
 	function getUserFacebookInfo () {
 		$facebook.api("/me").then( 
 			function(response) {
-				Request.getUserProfile(response.id).then(
+
+				var data = { identity: UserIdentity.authenticatedUser };
+
+				angular.extend(data, response);
+				
+				$scope.setCurrentUser(data);
+
+			},
+			function(err) {
+				$location.path('/');
+			}
+		);
+		/*
+		$facebook.api("/me").then( 
+			function(response) {
+				Request.getJWT(response.id).then(
 				// OK
-				function () {
-					
+				function (res) {
+
 				}, 
 				// Error
 				function () {
@@ -19,6 +34,7 @@ angular
 				$location.path('/');
 			}
 		);
+*/
 	}
 		
 	$scope.FBLogin = function () {

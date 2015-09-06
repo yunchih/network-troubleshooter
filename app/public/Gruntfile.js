@@ -58,6 +58,7 @@ module.exports = function(grunt) {
                   'bower_components/angular-route/angular-route.min.js',
                   'bower_components/angular-sanitize/angular-sanitize.min.js',
                   'bower_components/angular-animate/angular-animate.min.js',
+                  'bower_components/angular-cookies/angular-cookies.min.js',
                   'bower_components/angular-awesome-slider/dist/angular-awesome-slider.min.js',
                   'bower_components/ng-facebook/ngFacebook.js',
                   /* Custom js files */

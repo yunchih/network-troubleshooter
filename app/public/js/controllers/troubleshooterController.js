@@ -1,6 +1,6 @@
 angular
 .module( "networkTroubleshooter")
-.controller( "troubleshooterController", function( $scope, $location, EnquiryHistory ){
+.controller( "troubleshooterController", function( $scope, $location ){
 
     $scope.currentEnquiry = model.issueList.issue;
     $scope.currentEnquiryID = 'issue';

@@ -3,37 +3,68 @@
 
 var troubleshooterApp = 
 angular
-.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute","ngFacebook", "angularAwesomeSlider"] )
-.config(['$routeProvider','$locationProvider','$facebookProvider', function ($routeProvider, $locationProvider, $facebookProvider) {
+.module( "networkTroubleshooter", [
+    "ngSanitize", 
+    "ngAnimate", 
+    "ngRoute",
+    "ngFacebook", 
+    "ngCookies",
+    "angularAwesomeSlider"] )
+.config(['$routeProvider','$locationProvider','$httpProvider', '$facebookProvider', function ($routeProvider, $locationProvider, $httpProvider, $facebookProvider) {
 
-    $facebookProvider.setAppId(475318909316785);
+    $facebookProvider
+        .setAppId(475318909316785);
 
     $routeProvider
         .when('/', {
             templateUrl: 'partials/welcome.html'
-        })
-        .when('/troubleshooter', {
-            templateUrl: 'partials/troubleshooter.html',
-            controller: 'troubleshooterController'
-        })
-        .when('/contact', {
-            templateUrl: 'partials/contact.html',
-            controller: 'contactController'
-        })
-        .when('/login', {
-            templateUrl : 'partials/login.html',
-            controller: 'loginController',
+            resolve: {
+                UserProfile: function (User) {
+                    return User.getProfile();                    
+                }
+            }
         })
         .when('/:page', {
             templateUrl: function (param) {
                 return 'partials/' + param.page + '.html';
             }
         });
+
+    $httpProvider.interceptors.push(['$q', '$location', 'Session', function ($q, $location, Session) {
+        return {
+            'request': function (config) {
+                /*
+                    Attach JWT Token to every outgoing request
+                */
+                config.headers = config.headers || {};
+                if (Session.token) {
+                    config.headers.Authorization = 'Bearer ' + Session.token;
+                }
+                return config;
+            },
+            'responseError': function (rejection) {
+                /* 
+                    The user is accessing restricted API or his API has expired 
+                */
+                if (rejection.status === 401 || rejection.status === 403) {
+                    if( User.hasLoggedIn() ){
+                        Session.destroy();
+                        $location.path('/signin');
+                    }
+                    else {
+                        $location.path('/');
+                    }
+                        
+                }
+                return $q.reject(rejection);
+            }
+        };
+    }]);
     $locationProvider.html5Mode(true);
 }])
 
 
-.run(function($rootScope, $location, $timeout) {
+.run(function($rootScope, $location, $timeout, Request, Session, User) {
 
 /*
 *
@@ -68,10 +99,16 @@ angular
         // Insert the Facebook JS SDK into the DOM
         firstScriptElement.parentNode.insertBefore(facebookJS, firstScriptElement);
     }());
-
+/*
+*
+*  Loads user data by utilizing the web token stored in cookies
+*  If the web token has not expired, it will load the profile successfully
+*  
+*/ 
+    
 })
-
-.controller( "mainController", [ '$scope', 'UserIdentity', function( $scope,  UserIdentity ){
+        
+.controller( "mainController", [ '$scope', 'UserProfile', function( $scope,  UserProfile, UserIdentity ){
 
     var navbarLayout = {};
 
@@ -95,7 +132,8 @@ angular
     $scope.navBar = navbarLayout;
 
     $scope.currentUser = {
-        identity: UserIdentity.unauthenticatedUser
+        // User.getIdentity(UserProfile) 
+        identity:  UserIdentity.unauthenticatedUser
     };
 
     $scope.enquiryHistory = [];
