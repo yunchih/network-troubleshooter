@@ -1,8 +1,8 @@
 angular
 .module( "networkTroubleshooter")
 .factory('$global', function(){
-
-    var userIdentity = 'authenticated_user';
+    
+    var userIdentity = 'unauthenticated_user';
     var user = {
         unauthenticated_user: {
             navbarLayout: [

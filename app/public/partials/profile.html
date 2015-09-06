@@ -9,26 +9,35 @@
 	#profile .mdl-card__title  {
 		box-shadow: none;
 	}
+	.field-name , .field-input, .error-message-container {
+		display: inline-block;
+		vertical-align: baseline;
+	}
 
+	.field-input {
+		max-width: 75%;
+	}
 	.field-name {
 		margin-right: 20px;
 	    font-size: 25px;
 	    color: #FF9E51;
-	    display: inline-block;
+	    width: 100px;
+		text-align: right;
 	}
-
-	#profile .mdl-textfield.is-focused > .mdl-textfield__input  {
+	.field-name.input-has-error {
+		color: red;
+	}
+	.input-has-error.mdl-textfield__input {
+		border-bottom: 2px solid red !important;
+	}
+	.field-input.is-focused > .mdl-textfield__input  {
 		border-color: #FF9E51;
-	}
-
-	#profile .mdl-textfield {
-		max-width: 75%;
 	}
 
 	#form-body {
 		margin-bottom: 27px
 	}
-	#profile #submit {
+	#submit {
    		font-size: 30px;
 	    padding: 20px;
 	    margin-bottom: 12px;
@@ -37,47 +46,53 @@
 	    transition: background-color 0.3s ease-out;
 	}
 
-	#profile #submit:hover {
+	#submit:hover {
 		background-color: rgba(158, 158, 158, 0.2);
 	}
-
-	@media screen and (max-width: 350px) {
-	    #profile .mdl-textfield__input {
+	#form-error-message {
+		color: red;
+	}
+	
+	@media screen and (max-width: 600px) {
+	    .field-name , .field-input>.mdl-textfield__input {
 	    	text-align: center;
 	    }
 	}
 </style>
-<div class="mdl-card mdl-shadow--2dp" id="profile">
+<div class="mdl-card mdl-shadow--2dp" id="profile" ng-controller="profileController">
 	<div class="mdl-card__title">
 		<h1 class="accent" id="username">陳耘志</h1>
 	</div>
-	<form action="#">
+	<form name="profileForm" novalidate ng-submit="profileForm.$valid && updateProfile()" >
+
 		<div id="form-body">
-			<div class="field">
-				<span class="field-name">學號</span>
-				<div class="mdl-textfield mdl-js-textfield">
-					<input class="mdl-textfield__input" type="text" id="studentID" value="B03902074" />
-					<!-- ng-model -->
-				</div>
-			</div>
-			<div class="field">
-				<span class="field-name">手機</span>
-				<div class="mdl-textfield mdl-js-textfield">
-					<input class="mdl-textfield__input" type="tel" id="phone" value="0978229545"/>
-					<!-- ng-model -->
-				</div>
-			</div>	
-			<div class="field">
-				<span class="field-name">房號</span>
-				<div class="mdl-textfield mdl-js-textfield">
-					<input class="mdl-textfield__input" type="text" id="roomID" value="229B"/>
-					<!-- ng-model -->
-				</div>
+			<div class="field" ng-repeat="field in profileFields">
+				<ng-form name="profileField">
+					<span 
+						class="field-name"
+						ng-class="{ 'input-has-error' : profileField.field.$invalid }">
+						{{ field.name }}
+					</span>
+					<div class="field-input mdl-textfield mdl-js-textfield">
+						<input class="mdl-textfield__input" 
+						type="text" 
+						name="field" 
+						ng-model="field.value" 
+						ng-pattern="patterns[field.name]"
+						ng-class="{ 'input-has-error' : profileField.field.$invalid }"
+						required/>
+					</div>
+				</ng-form>
 			</div>
 		</div>
 			
 		<div class="mdl-card-footer-button mdl-card__actions mdl-card--border"></div>
-		<input type="submit" value="更新資料" id="submit">
+		<input type="submit" value="更新資料" id="submit" >
+		<p class="animation-pop" id="form-error-message" 
+			ng-show="profileForm.$invalid" >
+			請確認所有資料格式正確
+		</p>
 	</form>
 	
 </div>
+

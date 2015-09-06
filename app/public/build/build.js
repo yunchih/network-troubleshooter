@@ -394,6 +394,10 @@ window.angular);
 var troubleshooterApp = 
 angular
 .module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute", "angularAwesomeSlider"] )
+.constant("API", {
+    url: "dntrs-tinray.rhcloud.com/api/",
+    version: "1.0"
+})
 .config(['$routeProvider','$locationProvider', function ($routeProvider, $locationProvider) {
     $routeProvider
         .when('/', {
@@ -406,6 +410,10 @@ angular
         .when('/contact', {
             templateUrl: 'partials/contact.html',
             controller: 'contactController'
+        })
+        .when('/login', {
+            templateUrl: 'partials/welcome.html',
+            controller: 'loginController'
         })
         .when('/:page', {
             templateUrl: function (param) {
@@ -429,6 +437,19 @@ angular
 })
 
 
+
+.controller( "mainController", [ '$scope', '$global', function( $scope, $global ){
+    $scope.navBarLayout = $global.getNavbar();
+}])
+
+.controller( "reportController", function( $scope , $enquiryHistory ){
+    $enquiryHistory.export();
+    $scope.enquiryExportResult = $enquiryHistory.getExportedEnquiryHistory();
+})
+
+
+angular
+.module( "networkTroubleshooter")
 .factory('$enquiryHistory', function(){ 
 
     var enquiryHistory = [], enquiryExport;
@@ -438,77 +459,110 @@ angular
             enquiryHistory = history;
         },
         export: function ( hasBeenExported ) {
-            if( !hasBeenExported ){
-                var enquiry;
-                var length = enquiryHistory.length;
-                enquiryExport = [];
-                for (var i = 0; i < length ; i++) {
-                     enquiry = enquiryHistory[i];
-                     enquiryExport.push( {
-                        question: enquiry.title,
-                        answer: enquiry.situation[ enquiry.selected.index ].answer
-                    });
-                };
-            }
+            var enquiry;
+            var length = enquiryHistory.length;
+            enquiryExport = [];
+            for (var i = 0; i < length ; i++) {
+                 enquiry = enquiryHistory[i];
+                 enquiryExport.push( {
+                    question: enquiry.title,
+                    answer: enquiry.situation[ enquiry.selected.index ].answer
+                });
+            };
+        },
+        getExportedEnquiryHistory: function () {
             return enquiryExport;
         }
     };
-})
+});
 
-.controller( "mainController", [ '$scope', '$global', function( $scope, $global ){
-    $scope.navBarLayout = $global.getNavbar();
-}])
-
-.controller( "reportController", function( $scope , $enquiryHistory ){
-    $scope.enquiryExportResult = 
-    $enquiryHistory.export(
-        false 
-        /* We notify the factory that this is the first time enquiryHistory is exported.*/
-        /* Previous enquiryHistory will be replaced by the new one. */
-    );
-})
-
-.controller( "troubleshooterController", function( $scope, $rootScope, $location, $enquiryHistory ){
-
-    $scope.enquiryHistory = [];
-    $scope.currentEnquiry = model.issueList.issue;
-    $scope.currentEnquiryID = 'issue';
-    $rootScope.exportEnquiries = {};
-
-    $scope.gotoNextPage = function (url) {
-
-        // Troubleshooter is done
-        // Prepare for export
-        $enquiryHistory.update( $scope.enquiryHistory );
-        
-        $location.path(url);
-    };
-
-    $scope.gotoNextEnquiry = function ( next ){	
-        if( next ){
-            $scope.enquiryHistory.push($scope.currentEnquiry);
-            $scope.currentEnquiryID = next;
-            $scope.currentEnquiry = model.issueList[ next ];
-            setTimeout( function () {
-               window.componentHandler.upgradeDom();
-            } , 100 );
+angular
+.module( "networkTroubleshooter")
+.factory('$global', function(){
+    
+    var userIdentity = 'unauthenticated_user';
+    var user = {
+        unauthenticated_user: {
+            navbarLayout: [
+                { 
+                    title: '登入',
+                    url: 'login'
+                }
+            ]
+        },
+        authenticated_user: {
+            navbarLayout: [
+                { 
+                    title: '個人資料',
+                    url: 'profile'
+                },
+                { 
+                    title: '登出',
+                    url: 'logout'
+                }
+            ]
         }
     };
 
-    $scope.historyBacktrack = function ( index ){
-        $scope.currentEnquiry = $scope.enquiryHistory[index];
-        $scope.enquiryHistory = $scope.enquiryHistory.slice( 0, index );
-        window.setTimeout(  window.componentHandler.upgradeDom, 100 );
+    var schedule = {
+        startTime: 9.5,  /* Starts at 9 am */
+        endTime: 23.5,  /* Ends at 11 pm */
+
+        numOfDateToChooseFrom: 5,
+        numOfSchedule: 3
     };
 
-    $scope.showGuide = function (guide) {
-        $scope.guide_url = 'partials/' +  guide.url ;
-        $scope.guide_name = guide.name;
+    /* A list of necessary result entry used in contact page */
+    /* The name of entry must correspond to id of its ng-template */
+    var resultEntries = [
+        { 
+            id: 'redo',
+            title: '重新進行疑難排解',
+            action: 'troubleshoot'
+        },
+        { 
+            id: 'report',
+            title: '疑難排解報告'
+        },
+        {
+            id: 'pickTime',
+            title: '有空時間'
+        },
+        {
+            id: 'confirmProfile',
+            title: '聯絡方式'
+        },
+        {
+            id: 'done',
+            title: '完成',
+            action: 'send'
+        }
+    ];
+
+    return {
+
+        getNavbar: function () {
+            return user[ userIdentity ].navbarLayout;
+        },  
+        getResultEntries: function () {
+            return resultEntries;
+        },
+        getSchedule: function () {
+            return schedule;
+        },
+        updateUserIdentity: function (identity) {
+            user.identity = identity;
+        }
     };
 
 });
 
+angular
+.module( "networkTroubleshooter")
+.factory('$request', function(){
 
+
+});
 angular
 .module( "networkTroubleshooter")
 .controller( "contactController", function( $scope , $global ){
@@ -552,6 +606,52 @@ angular
             return null;
         
     };
+});
+angular
+.module( "networkTroubleshooter")
+.controller( "loginController", function( $scope , $global ){
+
+});
+
+angular
+.module( "networkTroubleshooter")
+.controller('profileController', function($scope){
+	$scope.profileFields = [
+		{
+			name: '真實姓名',
+			value: '陳耘志'
+		},
+		{
+			name: '學號',
+			value: 'B039020741'
+		},
+		{
+			name: '房號',
+			value: '239'
+		},
+		{
+			name: '電話',
+			value: '0988s282193'
+		}
+	];
+	$scope.patterns = {
+		'電話': /^\d{10}$/i,
+		'房號': /^\d{3}$/i,
+		'學號': /^\w\d{8}$/i,
+		'email':  /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i
+	};
+
+	// $scope.profile = getProfile('user').setCache('xxProfile');
+
+	$scope.updateProfile = function () {
+		
+		// if( getCache('xxProfile') == $scope.profile ){
+		// 	// do http request
+		// }
+		// else {
+		// 	// do nothing
+		// }
+	};
 });
 
 function populateNextFewDays (numberOfDates) {
@@ -669,87 +769,6 @@ angular
 
 });
 
-
-angular
-.module( "networkTroubleshooter")
-.factory('$global', function(){
-
-    var userIdentity = 'authenticated_user';
-    var user = {
-        unauthenticated_user: {
-            navbarLayout: [
-                { 
-                    title: '登入',
-                    url: 'login'
-                }
-            ]
-        },
-        authenticated_user: {
-            navbarLayout: [
-                { 
-                    title: '個人資料',
-                    url: 'profile'
-                },
-                { 
-                    title: '登出',
-                    url: 'logout'
-                }
-            ]
-        }
-    };
-
-    var schedule = {
-        startTime: 9.5,  /* Starts at 9 am */
-        endTime: 23.5,  /* Ends at 11 pm */
-
-        numOfDateToChooseFrom: 5,
-        numOfSchedule: 3
-    };
-
-    /* A list of necessary result entry used in contact page */
-    /* The name of entry must correspond to id of its ng-template */
-    var resultEntries = [
-        { 
-            id: 'redo',
-            title: '重新進行疑難排解',
-            action: 'troubleshoot'
-        },
-        { 
-            id: 'report',
-            title: '疑難排解報告'
-        },
-        {
-            id: 'pickTime',
-            title: '有空時間'
-        },
-        {
-            id: 'confirmProfile',
-            title: '聯絡方式'
-        },
-        {
-            id: 'done',
-            title: '完成',
-            action: 'send'
-        }
-    ];
-
-    return {
-
-        getNavbar: function () {
-            return user[ userIdentity ].navbarLayout;
-        },  
-        getResultEntries: function () {
-            return resultEntries;
-        },
-        getSchedule: function () {
-            return schedule;
-        },
-        updateUserIdentity: function (identity) {
-            user.identity = identity;
-        }
-    };
-
-});
 
 /**
  * material-design-lite - Material Design Components in CSS, JS and HTML
