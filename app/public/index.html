@@ -29,9 +29,11 @@
 
         <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout__header--waterfall">
             <div class="mdl-layout__drawer mdl-layout--small-screen-only">
-                <span class="mdl-layout-title">選項</span>
+                <span ng-if="currentUser.name" class="mdl-layout-title">
+                    {{ currentUser.name }}
+                </span>
                 <nav class="mdl-navigation">
-                    <a ng-repeat="nav in navBarLayout" class="mdl-navigation__link"  href="{{ nav.url }}">  
+                    <a ng-repeat="nav in navBar[ currentUser.identity ]" class="mdl-navigation__link"  href="{{ nav.url }}">  
                             {{ nav.title }}
                     </a>
                 </nav>
@@ -42,9 +44,11 @@
                     <span class="mdl-layout-title"><a id="brand" href="/">男一舍網路維修系統</a></span>
 
                     <div class="mdl-layout-spacer"></div>
-
+                    <span ng-if="currentUser.name" class="mdl-layout-title">
+                        {{ currentUser.name }}
+                    </span>
                     <nav class="mdl-navigation mdl-layout--large-screen-only">
-                        <a ng-repeat="nav in navBarLayout" class="mdl-navigation__link"  href="{{ nav.url }}">  
+                        <a ng-repeat="nav in navBar[ currentUser.identity ]" class="mdl-navigation__link"  href="{{ nav.url }}">  
                             {{ nav.title }}
                         </a>
                     </nav>

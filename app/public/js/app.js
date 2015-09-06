@@ -3,12 +3,11 @@
 
 var troubleshooterApp = 
 angular
-.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute", "angularAwesomeSlider"] )
-.constant("API", {
-    url: "dntrs-tinray.rhcloud.com/api/",
-    version: "1.0"
-})
-.config(['$routeProvider','$locationProvider', function ($routeProvider, $locationProvider) {
+.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute","ngFacebook", "angularAwesomeSlider"] )
+.config(['$routeProvider','$locationProvider','$facebookProvider', function ($routeProvider, $locationProvider, $facebookProvider) {
+
+    $facebookProvider.setAppId(475318909316785);
+
     $routeProvider
         .when('/', {
             templateUrl: 'partials/welcome.html'
@@ -22,8 +21,8 @@ angular
             controller: 'contactController'
         })
         .when('/login', {
-            templateUrl: 'partials/welcome.html',
-            controller: 'loginController'
+            templateUrl : 'partials/login.html',
+            controller: 'loginController',
         })
         .when('/:page', {
             templateUrl: function (param) {
@@ -33,27 +32,78 @@ angular
     $locationProvider.html5Mode(true);
 }])
 
+
+.run(function($rootScope, $location, $timeout) {
+
 /*
 *
 *  Upgrade MDL Object within ng-view partial
 *
-*/
-.run(function($rootScope, $location, $timeout) {
+*/ 
     $rootScope.$on('$viewContentLoaded', function() {
         $timeout(function() {
             componentHandler.upgradeDom();
         },100);
     });
+
+/*
+*
+*  Load the facebook SDK asynchronously
+*
+*/ 
+    (function(){
+        // If we've already installed the SDK, we're done
+        if (document.getElementById('facebook-jssdk')) {return;}
+
+        // Get the first script element, which we'll use to find the parent node
+        var firstScriptElement = document.getElementsByTagName('script')[0];
+
+        // Create a new script element and set its id
+        var facebookJS = document.createElement('script'); 
+        facebookJS.id = 'facebook-jssdk';
+
+        // Set the new script's source to the source of the Facebook JS SDK
+        facebookJS.src = '//connect.facebook.net/en_US/all.js';
+
+        // Insert the Facebook JS SDK into the DOM
+        firstScriptElement.parentNode.insertBefore(facebookJS, firstScriptElement);
+    }());
+
 })
 
+.controller( "mainController", [ '$scope', 'UserIdentity', function( $scope,  UserIdentity ){
 
+    var navbarLayout = {};
 
-.controller( "mainController", [ '$scope', '$global', function( $scope, $global ){
-    $scope.navBarLayout = $global.getNavbar();
-}])
+    navbarLayout[UserIdentity.unauthenticatedUser] = [
+        { 
+            title: '登入',
+            url: 'login'
+        }
+    ];
+    navbarLayout[UserIdentity.authenticatedUser] = [
+        { 
+            title: '個人資料',
+            url: 'profile'
+        },
+        { 
+            title: '登出',
+            url: 'logout'
+        }
+    ];
 
-.controller( "reportController", function( $scope , $enquiryHistory ){
-    $enquiryHistory.export();
-    $scope.enquiryExportResult = $enquiryHistory.getExportedEnquiryHistory();
-})
+    $scope.navBar = navbarLayout;
+
+    $scope.currentUser = {
+        identity: UserIdentity.unauthenticatedUser
+    };
+
+    $scope.enquiryHistory = [];
+
+    $scope.setCurrentUser = function (user) {
+        $scope.currentUser = user;
+    };
+
+}]);
+
 

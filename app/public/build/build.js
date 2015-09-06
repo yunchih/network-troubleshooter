@@ -388,17 +388,261 @@ window.angular);
 * License: MIT 
 **/
 !function(a){"use strict";a.module("angularAwesomeSlider",[]).directive("slider",["$compile","$templateCache","$timeout","$window","slider",function(b,c,d,e,f){return{restrict:"AE",require:"?ngModel",scope:{options:"=",ngDisabled:"="},priority:1,link:function(g,h,i,j){function k(){a.element(e).bind("resize",function(a){g.slider.onresize()})}if(j){if(!g.options)throw new Error('You must provide a value for "options" attribute.');a.injector();a.isString(g.options)&&(g.options=a.toJson(g.options)),g.mainSliderClass="jslider",g.mainSliderClass+=g.options.skin?" jslider_"+g.options.skin:" ",g.mainSliderClass+=g.options.vertical?" vertical ":"",g.mainSliderClass+=g.options.css?" sliderCSS":"",g.mainSliderClass+=g.options.className?" "+g.options.className:"",g.options.limits=a.isDefined(g.options.limits)?g.options.limits:!0,h.after(b(c.get("ng-slider/slider-bar.tmpl.html"))(g,function(a,b){b.tmplElt=a}));var l=!1,m=function(){g.from=""+g.options.from,g.to=""+g.options.to,g.options.calculate&&"function"==typeof g.options.calculate&&(g.from=g.options.calculate(g.from),g.to=g.options.calculate(g.to));var b={from:g.options.round?parseFloat(g.options.from):parseInt(g.options.from,10),to:g.options.round?parseFloat(g.options.to):parseInt(g.options.to,10),step:g.options.step,smooth:g.options.smooth,limits:g.options.limits,round:g.options.round||!1,value:j.$viewValue,dimension:"",scale:g.options.scale,modelLabels:g.options.modelLabels,vertical:g.options.vertical,css:g.options.css,className:g.options.className,realtime:g.options.realtime,cb:n,threshold:g.options.threshold,heterogeneity:g.options.heterogeneity};b.calculate=g.options.calculate||void 0,b.onstatechange=g.options.onstatechange||void 0,g.slider=g.slider?g.slider.init(h,g.tmplElt,b):p(h,g.tmplElt,b),l||k();var c=g.tmplElt.find("div")[7];a.element(c).html(g.slider.generateScale()),g.slider.drawScale(c),g.ngDisabled&&o(g.ngDisabled),l=!0};j.$render=function(){if((j.$viewValue||0===j.$viewValue)&&("number"==typeof j.$viewValue&&(j.$viewValue=""+j.$viewValue),j.$viewValue.split(";")[1]||(g.mainSliderClass+=" jslider-single"),g.slider)){var a=g.slider.getPointers()[0];if(a.set(g.from,!0),j.$viewValue.split(";")[1]){var b=g.slider.getPointers()[1];a.set(g.to,!0),b.set(j.$viewValue.split(";")[1],!0)}a.set(j.$viewValue.split(";")[0],!0)}};var n=function(a,b){g.disabled||(g.$apply(function(){j.$setViewValue(a)}),g.options.callback&&g.options.callback(a,b))};g.$watch("options",function(a){d(function(){m()})},g.watchOptions||!0);var o=function(a){g.disabled=a,g.slider&&(g.tmplElt.toggleClass("disabled"),g.slider.disable(a))};g.$watch("ngDisabled",function(a){o(a)}),g.limitValue=function(b){return g.options.modelLabels?a.isFunction(g.options.modelLabels)?g.options.modelLabels(b):void 0!==g.options.modelLabels[b]?g.options.modelLabels[b]:b:b};var p=function(a,b,c){return new f(a,b,c)}}}}}]).config(function(){}).run(function(){})}(angular),function(a){"use strict";a.module("angularAwesomeSlider").constant("sliderConstants",{SLIDER:{settings:{from:1,to:40,step:1,smooth:!0,limits:!1,round:!1,value:"3",dimension:"",vertical:!1,calculate:!1,onstatechange:!1,callback:!1,realtime:!1},className:"jslider",selector:".jslider-",css:{visible:{visibility:"visible"},hidden:{visibility:"hidden"}}},EVENTS:{}})}(angular),function(a){"use strict";a.module("angularAwesomeSlider").factory("sliderUtils",["$window",function(a){return{offset:function(a){var b=a[0],c=0,d=0,e=document.documentElement||document.body,f=window.pageXOffset||e.scrollLeft,g=window.pageYOffset||e.scrollTop;return c=b.getBoundingClientRect().left+f,d=b.getBoundingClientRect().top+g,{left:c,top:d}},browser:function(){var b=a.navigator.userAgent,c={mozilla:/mozilla/i,chrome:/chrome/i,safari:/safari/i,firefox:/firefox/i,ie:/internet explorer/i};for(var d in c)if(c[d].test(b))return d;return"unknown"}}}])}(angular),function(a){"use strict";a.module("angularAwesomeSlider").factory("sliderDraggable",["sliderUtils",function(b){function c(){this._init.apply(this,arguments)}return c.prototype.oninit=function(){},c.prototype.events=function(){},c.prototype.onmousedown=function(){this.ptr.css({position:"absolute"})},c.prototype.onmousemove=function(a,b,c){this.ptr.css({left:b,top:c})},c.prototype.onmouseup=function(){},c.prototype.isDefault={drag:!1,clicked:!1,toclick:!0,mouseup:!1},c.prototype._init=function(){if(arguments.length>0){if(this.ptr=arguments[0],this.parent=arguments[2],!this.ptr)return;this.is={},a.extend(this.is,this.isDefault);var c=b.offset(this.ptr);this.d={left:c.left,top:c.top,width:this.ptr[0].clientWidth,height:this.ptr[0].clientHeight},this.oninit.apply(this,arguments),this._events()}},c.prototype._getPageCoords=function(a){return a.targetTouches&&a.targetTouches[0]?{x:a.targetTouches[0].pageX,y:a.targetTouches[0].pageY}:{x:a.pageX,y:a.pageY}},c.prototype._bindEvent=function(a,b,c){this.supportTouches_&&a[0].addEventListener(this.events_[b].touch,c,!1),a.bind(this.events_[b].nonTouch,c)},c.prototype._events=function(){var b=this;this.supportTouches_="ontouchend"in document,this.events_={click:{touch:"touchstart",nonTouch:"click"},down:{touch:"touchstart",nonTouch:"mousedown"},move:{touch:"touchmove",nonTouch:"mousemove"},up:{touch:"touchend",nonTouch:"mouseup"},mousedown:{touch:"mousedown",nonTouch:"mousedown"}};var c=a.element(window.document);this._bindEvent(c,"move",function(a){b.is.drag&&(a.stopPropagation(),a.preventDefault(),b.parent.disabled||b._mousemove(a))}),this._bindEvent(c,"down",function(a){b.is.drag&&(a.stopPropagation(),a.preventDefault())}),this._bindEvent(c,"up",function(a){b._mouseup(a)}),this._bindEvent(this.ptr,"down",function(a){return b._mousedown(a),!1}),this._bindEvent(this.ptr,"up",function(a){b._mouseup(a)}),this.events()},c.prototype._mousedown=function(b){this.is.drag=!0,this.is.clicked=!1,this.is.mouseup=!1;var c=this._getPageCoords(b);this.cx=c.x-this.ptr[0].offsetLeft,this.cy=c.y-this.ptr[0].offsetTop,a.extend(this.d,{left:c.x,top:c.y,width:this.ptr[0].clientWidth,height:this.ptr[0].clientHeight}),this.outer&&this.outer.get(0)&&this.outer.css({height:Math.max(this.outer.height(),$(document.body).height()),overflow:"hidden"}),this.onmousedown(b)},c.prototype._mousemove=function(a){this.is.toclick=!1;var b=this._getPageCoords(a);this.onmousemove(a,b.x-this.cx,b.y-this.cy)},c.prototype._mouseup=function(a){if(this.is.drag){this.is.drag=!1;var c=b.browser();this.outer&&this.outer.get(0)&&("mozilla"===c?this.outer.css({overflow:"hidden"}):this.outer.css({overflow:"visible"}),this.outer.css({height:"auto"})),this.onmouseup(a)}},c}])}(angular),function(a){"use strict";a.module("angularAwesomeSlider").factory("sliderPointer",["sliderDraggable","sliderUtils",function(b,c){function d(){b.apply(this,arguments)}return d.prototype=new b,d.prototype.oninit=function(b,c,d,e){this.uid=c,this.parent=e,this.value={},this.vertical=d,this.settings=a.copy(e.settings),this.threshold=this.settings.threshold},d.prototype.onmousedown=function(a){var b=c.offset(this.parent.domNode),d={left:b.left,top:b.top,width:this.parent.domNode[0].clientWidth,height:this.parent.domNode[0].clientHeight};this._parent={offset:d,width:d.width,height:d.height},this.ptr.addClass("jslider-pointer-hover")},d.prototype.onmousemove=function(b,c,d){var e=this._getPageCoords(b);this._set(this.vertical?this.calc(e.y):this.calc(e.x)),this.settings.realtime&&this.settings.cb&&a.isFunction(this.settings.cb)&&this.settings.cb.call(this.parent,this.parent.getValue(),!this.is.drag)},d.prototype.onmouseup=function(b){this.settings.cb&&a.isFunction(this.settings.cb)&&this.settings.cb.call(this.parent,this.parent.getValue(),!this.is.drag),this.is.drag||this.ptr.removeClass("jslider-pointer-hover")},d.prototype.limits=function(a){return this.parent.limits(a,this)},d.prototype.calc=function(a){return this.vertical?this.limits(100*(a-this._parent.offset.top)/this._parent.height):this.limits(100*(a-this._parent.offset.left)/this._parent.width)},d.prototype.set=function(a,b){this.value.origin=this.parent.round(a),this._set(this.parent.valueToPrc(a,this),b)},d.prototype._set=function(a,b){this.allowed=!0;var c=this.value.origin,d=this.value.prc;if(this.value.origin=this.parent.prcToValue(a),this.value.prc=a,this.threshold&&this.parent.o.pointers[1]){var e=this.value.origin,f=this.parent.o.pointers[0===this.uid?1:0].value.origin;this.allowed=Math.abs(f-e)>=this.threshold,this.allowed||void 0===c||void 0===d||(this.value.origin=c,this.value.prc=d)}this.vertical?this.ptr.css({top:this.value.prc+"%",marginTop:-5}):this.ptr.css({left:this.value.prc+"%"}),this.parent.redraw(this)},d}])}(angular),function(a){"use strict";a.module("angularAwesomeSlider").factory("slider",["sliderPointer","sliderConstants","sliderUtils",function(b,c,d){function e(){return this.init.apply(this,arguments)}return e.prototype.init=function(b,d,e){return this.settings=e,this.inputNode=b,this.inputNode.addClass("ng-hide"),this.settings.interval=this.settings.to-this.settings.from,this.settings.calculate&&a.isFunction(this.settings.calculate)&&(this.nice=this.settings.calculate),this.settings.onstatechange&&a.isFunction(this.settings.onstatechange)&&(this.onstatechange=this.settings.onstatechange),this.css=c.SLIDER.css,this.is={init:!1},this.o={},this.initValue={},this.isAsc=e.from<e.to,this.create(d),this},e.prototype.create=function(c){var e=this;this.domNode=c;var f=this.domNode.find("div"),g=this.domNode.find("i"),h=a.element,i=a.extend,j=a.forEach,k=h(f[1]),l=h(f[2]),m=h(f[5]),n=h(f[6]),o=h(g[0]),p=h(g[1]),q=h(g[2]),r=h(g[3]),s=h(g[4]),t=h(g[5]),u=h(g[6]),v=[k,l],w=d.offset(this.domNode),x={left:w.left,top:w.top,width:this.domNode[0].clientWidth,height:this.domNode[0].clientHeight},y=e.settings.value.split(";");this.sizes={domWidth:this.domNode[0].clientWidth,domHeight:this.domNode[0].clientHeight,domOffset:x},i(this.o,{pointers:{},labels:{0:{o:m},1:{o:n}},limits:{0:a.element(f[3]),1:a.element(f[4])},indicators:{0:r,1:s,2:t,3:u}}),i(this.o.labels[0],{value:this.o.labels[0].o.find("span")}),i(this.o.labels[1],{value:this.o.labels[1].o.find("span")}),this.settings.single=!e.settings.value.split(";")[1],this.settings.single&&q.addClass("ng-hide"),j(v,function(c,f){e.settings=a.copy(e.settings);var g,h,i,j,k,l=y[f];l&&(e.o.pointers[f]=new b(c,f,e.settings.vertical,e),g=y[f-1],h=g?parseInt(g,10):void 0,l=e.settings.round?parseFloat(l):parseInt(l,10),(g&&e.isAsc?h>l:l>h)&&(l=g),i=e.isAsc?l>e.settings.to:l<e.settings.to,j=i?e.settings.to:l,e.o.pointers[f].set(j,!0),k=d.offset(e.o.pointers[f].ptr),e.o.pointers[f].d={left:k.left,top:k.top})}),e.domNode.bind("mousedown",e.clickHandler.apply(e)),this.o.value=h(this.domNode.find("i")[2]),this.is.init=!0,this.settings.css&&(o.css(this.settings.css.background?this.settings.css.background:{}),p.css(this.settings.css.background?this.settings.css.background:{}),this.o.pointers[1]||(r.css(this.settings.css.before?this.settings.css.before:{}),u.css(this.settings.css.after?this.settings.css.after:{})),s.css(this.settings.css["default"]?this.settings.css["default"]:{}),t.css(this.settings.css["default"]?this.settings.css["default"]:{}),q.css(this.settings.css.range?this.settings.css.range:{}),k.css(this.settings.css.pointer?this.settings.css.pointer:{}),l.css(this.settings.css.pointer?this.settings.css.pointer:{})),j(this.o.pointers,function(a,b){e.redraw(a)})},e.prototype.clickHandler=function(){var b=this,c=function(a){var c=b.o.pointers[0].ptr,e=b.o.pointers[1].ptr,f=d.offset(c),g=d.offset(e);b.o.pointers[0].d={left:f.left,top:f.top,width:c[0].clientWidth,height:c[0].clientHeight},b.o.pointers[1].d={left:g.left,top:g.top,width:e[0].clientWidth,height:e[0].clientHeight}};return function(e){if(!b.disabled){var f=b.settings.vertical,g=0,h=d.offset(b.domNode),i=b.o.pointers[0],j=b.o.pointers[1]?b.o.pointers[1]:null,k=e.originalEvent?e.originalEvent:e,l=f?k.pageY:k.pageX,m=f?"top":"left",n={left:h.left,top:h.top,width:b.domNode[0].clientWidth,height:b.domNode[0].clientHeight},o=b.o.pointers[g];if(j){j.d.width||c();var p=d.offset(i.ptr)[m],q=d.offset(j.ptr)[m],r=Math.abs((q-p)/2),s=l>=q||l>=q-r;s&&(o=j)}o._parent={offset:n,width:n.width,height:n.height};var t=i._getPageCoords(e);return o.cx=t.x-o.d.left,o.cy=t.y-o.d.top,o.onmousemove(e,t.x,t.y),o.onmouseup(),a.extend(o.d,{left:t.x,top:t.y}),b.redraw(o),!1}}},e.prototype.disable=function(a){this.disabled=a},e.prototype.nice=function(a){return a},e.prototype.onstatechange=function(){},e.prototype.limits=function(a,b){if(!this.settings.smooth){var c=100*this.settings.step/this.settings.interval;a=Math.round(a/c)*c}if(b){var d=this.o.pointers[1-b.uid];d&&b.uid&&a<d.value.prc&&(a=d.value.prc),d&&!b.uid&&a>d.value.prc&&(a=d.value.prc)}return 0>a&&(a=0),a>100&&(a=100),Math.round(10*a)/10},e.prototype.getPointers=function(){return this.o.pointers},e.prototype.generateScale=function(){if(this.settings.scale&&this.settings.scale.length>0){for(var a,b,c="",d=this.settings.scale,e={},f=this.settings.vertical?"top":"left",g=0;g<d.length;g++)d[g].val||(a=(100/(d.length-1)).toFixed(2),c+='<span style="'+f+": "+g*a+'%">'+("|"!=d[g]?"<ins>"+d[g]+"</ins>":"")+"</span>"),d[g].val<=this.settings.to&&d[g].val>=this.settings.from&&!e[d[g].val]&&(e[d[g].val]=!0,a=this.valueToPrc(d[g].val),b=d[g].label?d[g].label:d[g].val,c+='<span style="'+f+": "+a+'%"><ins>'+b+"</ins></span>");return c}return""},e.prototype.onresize=function(){var b=this;this.sizes={domWidth:this.domNode[0].clientWidth,domHeight:this.domNode[0].clientHeight,domOffset:{left:this.domNode[0].offsetLeft,top:this.domNode[0].offsetTop,width:this.domNode[0].clientWidth,height:this.domNode[0].clientHeight}},a.forEach(this.o.pointers,function(a,c){b.redraw(a)})},e.prototype.update=function(){this.onresize(),this.drawScale()},e.prototype.drawScale=function(b){a.forEach(a.element(b).find("ins"),function(a,b){a.style.marginLeft=-a.clientWidth/2})},e.prototype.redraw=function(b){if(!this.is.init)return this.o.pointers[0]&&!this.o.pointers[1]?(this.originValue=this.o.pointers[0].value.prc,this.o.indicators[0].css(this.settings.vertical?{top:0,height:this.o.pointers[0].value.prc+"%"}:{left:0,width:this.o.pointers[0].value.prc+"%"}),this.o.indicators[1].css(this.settings.vertical?{top:this.o.pointers[0].value.prc+"%"}:{left:this.o.pointers[0].value.prc+"%"}),this.o.indicators[3].css(this.settings.vertical?{top:this.o.pointers[0].value.prc+"%"}:{left:this.o.pointers[0].value.prc+"%"})):(this.o.indicators[2].css(this.settings.vertical?{top:this.o.pointers[1].value.prc+"%"}:{left:this.o.pointers[1].value.prc+"%"}),this.o.indicators[0].css(this.settings.vertical?{top:0,height:"0"}:{left:0,width:"0"}),this.o.indicators[3].css(this.settings.vertical?{top:"0",height:"0"}:{left:"0",width:"0"})),!1;this.setValue();var c,d;this.o.pointers[0]&&this.o.pointers[1]&&(c=this.settings.vertical?{top:this.o.pointers[0].value.prc+"%",height:this.o.pointers[1].value.prc-this.o.pointers[0].value.prc+"%"}:{left:this.o.pointers[0].value.prc+"%",width:this.o.pointers[1].value.prc-this.o.pointers[0].value.prc+"%"},this.o.value.css(c),this.o.pointers[0].value.prc===this.o.pointers[1].value.prc&&this.o.pointers[1].ptr.css("z-index",0===this.o.pointers[0].value.prc?"3":"1")),this.o.pointers[0]&&!this.o.pointers[1]&&(d=this.o.pointers[0].value.prc-this.originValue,d>=0?this.o.indicators[3].css(this.settings.vertical?{height:d+"%"}:{width:d+"%"}):this.o.indicators[3].css(this.settings.vertical?{height:0}:{width:0}),this.o.pointers[0].value.prc<this.originValue?this.o.indicators[0].css(this.settings.vertical?{height:this.o.pointers[0].value.prc+"%"}:{width:this.o.pointers[0].value.prc+"%"}):this.o.indicators[0].css(this.settings.vertical?{height:this.originValue+"%"}:{width:this.originValue+"%"}));var e=this.nice(b.value.origin);this.settings.modelLabels&&(e=a.isFunction(this.settings.modelLabels)?this.settings.modelLabels(e):void 0!==this.settings.modelLabels[e]?this.settings.modelLabels[e]:e),this.o.labels[b.uid].value.html(e),this.redrawLabels(b)},e.prototype.redrawLabels=function(a){function b(a,b,d){b.margin=-b.label/2;var e=c.settings.vertical?c.sizes.domHeight:c.sizes.domWidth;if(c.sizes.domWidth){var f=b.border+b.margin;0>f&&(b.margin-=f),c.sizes.domWidth>0&&b.border+b.label/2>e?(b.margin=0,b.right=!0):b.right=!1}return c.settings.vertical?a.o.css({top:d+"%",marginLeft:"20px",marginTop:b.margin,bottom:"auto"}):a.o.css({left:d+"%",marginLeft:b.margin+"px",right:"auto"}),b.right&&c.sizes.domWidth>0&&(c.settings.vertical?a.o.css({top:"auto",bottom:0}):a.o.css({left:"auto",right:0})),b}var c=this,d=this.o.labels[a.uid],e=a.value.prc,f=0===d.o[0].offsetWidth?7*d.o[0].textContent.length:d.o[0].offsetWidth;this.sizes.domWidth=this.domNode[0].clientWidth,this.sizes.domHeight=this.domNode[0].clientHeight;var g,h,i={label:c.settings.vertical?d.o[0].offsetHeight:f,right:!1,border:e*(c.settings.vertical?this.sizes.domHeight:this.sizes.domWidth)/100},j=0===a.uid?1:0;if(!this.settings.single&&!this.settings.vertical){g=this.o.labels[j],h=this.o.pointers[j];var k=this.o.labels[0],l=this.o.labels[1],m=this.o.pointers[0],n=this.o.pointers[1],o=n.ptr[0].offsetLeft-m.ptr[0].offsetLeft,p=this.nice(h.value.origin);if(k.o.css(this.css.visible),l.o.css(this.css.visible),p=this.getLabelValue(p),o+10<k.o[0].offsetWidth+l.o[0].offsetWidth){if(g.o.css(this.css.hidden),g.value.html(p),e=(h.value.prc-e)/2+e,h.value.prc!=a.value.prc){p=this.nice(this.o.pointers[0].value.origin);var q=this.nice(this.o.pointers[1].value.origin);p=this.getLabelValue(p),q=this.getLabelValue(q),d.value.html(p+"&nbsp;&ndash;&nbsp;"+q),i.label=d.o[0].offsetWidth,i.border=e*r/100}}else g.value.html(p),g.o.css(this.css.visible)}i=b(d,i,e);var r=c.settings.vertical?c.sizes.domHeight:c.sizes.domWidth;if(g){var s=0===d.o[0].offsetWidth?d.o[0].textContent.length/2*7:d.o[0].offsetWidth,t={label:c.settings.vertical?g.o[0].offsetHeight:s,right:!1,border:h.value.prc*this.sizes.domWidth/100};i=b(g,t,h.value.prc)}this.redrawLimits()},e.prototype.redrawLimits=function(){if(this.settings.limits){var b=[!0,!0],c=0;for(var d in this.o.pointers)if(!this.settings.single||0===d){var e=this.o.pointers[d],f=this.o.labels[e.uid],g=f.o[0].offsetLeft-this.sizes.domOffset.left,h=this.o.limits[0];g<h[0].clientWidth&&(b[0]=!1),h=this.o.limits[1],g+f.o[0].clientWidth>this.sizes.domWidth-h[0].clientWidth&&(b[1]=!1)}for(;c<b.length;c++)b[c]?a.element(this.o.limits[c]).addClass("animate-show"):a.element(this.o.limits[c]).addClass("animate-hidde")}},e.prototype.setValue=function(){var a=this.getValue();this.inputNode.attr("value",a),this.onstatechange.call(this,a,this.inputNode)},e.prototype.getValue=function(){if(!this.is.init)return!1;var b=this,c="";return a.forEach(this.o.pointers,function(a,d){void 0===a.value.prc||isNaN(a.value.prc)||(c+=(d>0?";":"")+b.prcToValue(a.value.prc))}),c},e.prototype.getLabelValue=function(b){return this.settings.modelLabels?a.isFunction(this.settings.modelLabels)?this.settings.modelLabels(b):void 0!==this.settings.modelLabels[b]?this.settings.modelLabels[b]:b:b},e.prototype.getPrcValue=function(){if(!this.is.init)return!1;var a="";return a},e.prototype.prcToValue=function(a){var b;if(this.settings.heterogeneity&&this.settings.heterogeneity.length>0)for(var c=this.settings.heterogeneity,d=0,e=this.settings.round?parseFloat(this.settings.from):parseInt(this.settings.from,10),f=this.settings.round?parseFloat(this.settings.to):parseInt(this.settings.to,10),g=0;g<=c.length;g++){var h;h=c[g]?c[g].split("/"):[100,f];var i=this.settings.round?parseFloat(h[0]):parseInt(h[0],10),j=this.settings.round?parseFloat(h[1]):parseInt(h[1],10);a>=d&&i>=a&&(b=e+(a-d)*(j-e)/(i-d)),d=i,e=j}else b=this.settings.from+a*this.settings.interval/100;return this.round(b)},e.prototype.valueToPrc=function(a,b){var c,d=this.settings.round?parseFloat(this.settings.from):parseInt(this.settings.from,10);if(this.settings.heterogeneity&&this.settings.heterogeneity.length>0)for(var e=this.settings.heterogeneity,f=0,g=0;g<=e.length;g++){var h;h=e[g]?e[g].split("/"):[100,this.settings.to];var i=this.settings.round?parseFloat(h[0]):parseInt(h[0],10),j=this.settings.round?parseFloat(h[1]):parseInt(h[1],10);a>=d&&j>=a&&(c=b?b.limits(f+(a-d)*(i-f)/(j-d)):this.limits(f+(a-d)*(i-f)/(j-d))),f=i,d=j}else c=b?b.limits(100*(a-d)/this.settings.interval):this.limits(100*(a-d)/this.settings.interval);return c},e.prototype.round=function(a){return a=Math.round(a/this.settings.step)*this.settings.step,a=this.settings.round?Math.round(a*Math.pow(10,this.settings.round))/Math.pow(10,this.settings.round):Math.round(a)},e}])}(angular),function(a,b){"use strict";a.module("angularAwesomeSlider").run(["$templateCache",function(a){a.put("ng-slider/slider-bar.tmpl.html",'<span ng-class="mainSliderClass" id="{{sliderTmplId}}"><table><tr><td><div class="jslider-bg"><i class="left"></i><i class="right"></i><i class="range"></i><i class="before"></i><i class="default"></i><i class="default"></i><i class="after"></i></div><div class="jslider-pointer"></div><div class="jslider-pointer jslider-pointer-to"></div><div class="jslider-label" ng-show="options.limits"><span ng-bind="limitValue(options.from)"></span>{{options.dimension}}</div><div class="jslider-label jslider-label-to" ng-show="options.limits"><span ng-bind="limitValue(options.to)"></span>{{options.dimension}}</div><div class="jslider-value"><span></span>{{options.dimension}}</div><div class="jslider-value jslider-value-to"><span></span>{{options.dimension}}</div><div class="jslider-scale" id="{{sliderScaleDivTmplId}}"></div></td></tr></table></span>')}])}(window.angular);
+/**
+ * Angular Facebook service
+ * ---------------------------
+ *
+ * Authored by  AlmogBaku (GoDisco)
+ *              almog@GoDisco.net
+ *              http://www.GoDisco.net/
+ *
+ * 9/8/13 10:25 PM
+ */
+
+angular.module('ngFacebook', [])
+  .provider('$facebook', function() {
+    var config = {
+      permissions:    'email',
+      appId:          null,
+      version:        'v1.0',
+      customInit:     {}
+    };
+
+    this.setAppId = function(appId) {
+      config.appId=appId;
+      return this;
+    };
+    this.getAppId = function() {
+      return config.appId;
+    };
+    this.setVersion = function(version) {
+      config.version=version;
+      return this;
+    };
+    this.getVersion = function() {
+      return config.version;
+    };
+    this.setPermissions = function(permissions) {
+      if(permissions instanceof Array) {
+        permissions.join(',');
+      }
+      config.permissions=permissions;
+      return this;
+    };
+    this.getPermissions = function() {
+      return config.permissions;
+    };
+    this.setCustomInit = function(customInit) {
+      if(angular.isDefined(customInit.appId)) {
+        this.setAppId(customInit.appId);
+      }
+      config.customInit=customInit;
+      return this;
+    };
+    this.getCustomInit = function() {
+      return config.customInit;
+    };
+
+    this.$get = ['$q', '$rootScope', '$window', function($q, $rootScope, $window) {
+      var $facebook=$q.defer();
+      $facebook.config = function(property) {
+        return config[property];
+      };
+
+      //Initialization
+      $facebook.init = function() {
+        if($facebook.config('appId')==null)
+          throw "$facebookProvider: `appId` cannot be null";
+
+        $window.FB.init(
+          angular.extend({ appId: $facebook.config('appId'), version: $facebook.config('version') }, $facebook.config("customInit"))
+        );
+        $rootScope.$broadcast("fb.load", $window.FB);
+      };
+
+      $rootScope.$on("fb.load", function(e, FB) {
+        $facebook.resolve(FB);
+
+        //Define action events
+        angular.forEach([
+          'auth.login', 'auth.logout', 'auth.prompt',
+          'auth.sessionChange', 'auth.statusChange', 'auth.authResponseChange',
+          'xfbml.render', 'edge.create', 'edge.remove', 'comment.create',
+          'comment.remove', 'message.send'
+        ],function(event) {
+          FB.Event.subscribe(event, function(response) {
+            $rootScope.$broadcast("fb."+event, response, FB);
+            if(!$rootScope.$$phase) $rootScope.$apply();
+          });
+        });
+
+        // Make sure 'fb.auth.authResponseChange' fires even if the user is not logged in.
+        $facebook.getLoginStatus();
+      });
+
+      /**
+       * Internal cache
+       */
+      $facebook._cache={};
+      $facebook.setCache = function(attr,val) {
+        $facebook._cache[attr]=val;
+      };
+      $facebook.getCache = function(attr) {
+        if(angular.isUndefined($facebook._cache[attr])) return false;
+        return $facebook._cache[attr];
+      };
+      $facebook.clearCache = function() {
+        $facebook._cache = {};
+      };
+
+      /**
+       * Authentication
+       */
+
+      var firstAuthResp=$q.defer();
+      var firstAuthRespReceived=false;
+      function resolveFirstAuthResp(FB) {
+        if (!firstAuthRespReceived) {
+          firstAuthRespReceived=true;
+          firstAuthResp.resolve(FB);
+        }
+      }
+
+      $facebook.setCache("connected", null);
+      $facebook.isConnected = function() {
+        return $facebook.getCache("connected");
+      };
+      $rootScope.$on("fb.auth.authResponseChange", function(event, response, FB) {
+        $facebook.clearCache();
+
+        if(response.status=="connected") {
+          $facebook.setCache("connected", true);
+        } else {
+          $facebook.setCache("connected", false);
+        }
+        resolveFirstAuthResp(FB);
+      });
+
+      $facebook.getAuthResponse = function () {
+        return FB.getAuthResponse();
+      };
+      $facebook.getLoginStatus = function (force) {
+        var deferred=$q.defer();
+
+        return $facebook.promise.then(function(FB) {
+          FB.getLoginStatus(function(response) {
+            if(response.error)  deferred.reject(response.error);
+            else {
+                deferred.resolve(response);
+                if($facebook.isConnected()==null)
+                    $rootScope.$broadcast("fb.auth.authResponseChange", response, FB);
+            }
+            if(!$rootScope.$$phase) $rootScope.$apply();
+          }, force);
+          return deferred.promise;
+        });
+      };
+      $facebook.login = function (permissions, rerequest) {
+        if(permissions==undefined) permissions=$facebook.config("permissions");
+        var deferred=$q.defer();
+
+        var loginOptions = { scope: permissions };
+        if (rerequest) {
+          loginOptions.auth_type = 'rerequest';
+        }
+
+        return $facebook.promise.then(function(FB) {
+          FB.login(function(response) {
+            if(response.error)  deferred.reject(response.error);
+            else                deferred.resolve(response);
+            if(!$rootScope.$$phase) $rootScope.$apply();
+          }, loginOptions);
+          return deferred.promise;
+        });
+      };
+      $facebook.logout = function () {
+        var deferred=$q.defer();
+
+        return $facebook.promise.then(function(FB) {
+          FB.logout(function(response) {
+            if(response.error)  deferred.reject(response.error);
+            else                deferred.resolve(response);
+            if(!$rootScope.$$phase) $rootScope.$apply();
+          });
+          return deferred.promise;
+        });
+      };
+      $facebook.ui = function (params) {
+        var deferred=$q.defer();
+
+        return $facebook.promise.then(function(FB) {
+          FB.ui(params, function(response) {
+            if(response && response.error_code) {
+              deferred.reject(response.error_message);
+            } else {
+              deferred.resolve(response);
+            }
+            if(!$rootScope.$$phase) $rootScope.$apply();
+          });
+          return deferred.promise;
+        });
+      };
+      $facebook.api = function () {
+        var deferred=$q.defer();
+        var args=arguments;
+        args[args.length++] = function(response) {
+          if(response.error)        deferred.reject(response.error);
+          if(response.error_msg)    deferred.reject(response);
+          else                      deferred.resolve(response);
+          if(!$rootScope.$$phase) $rootScope.$apply();
+        };
+
+        return firstAuthResp.promise.then(function(FB) {
+          FB.api.apply(FB, args);
+          return deferred.promise;
+        });
+      };
+
+      /**
+       * API cached request - cached request api with promise
+       *
+       * @param path
+       * @returns $q.defer.promise
+       */
+      $facebook.cachedApi = function() {
+        if(typeof arguments[0] !== 'string')
+          throw "$facebook.cacheApi can works only with graph requests!";
+
+        var promise = $facebook.getCache(arguments[0]);
+        if(promise) return promise;
+
+        var result = $facebook.api.apply($facebook, arguments);
+        $facebook.setCache(arguments[0], result);
+
+        return result;
+      };
+
+      return $facebook;
+    }];
+  })
+  .run(['$rootScope', '$window', '$facebook', function($rootScope, $window, $facebook) {
+    $window.fbAsyncInit = function() {
+      $facebook.init();
+      if(!$rootScope.$$phase) $rootScope.$apply();
+    };
+  }])
+;
+
 'use strict';
 
 
 var troubleshooterApp = 
 angular
-.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute", "angularAwesomeSlider"] )
-.constant("API", {
-    url: "dntrs-tinray.rhcloud.com/api/",
-    version: "1.0"
-})
-.config(['$routeProvider','$locationProvider', function ($routeProvider, $locationProvider) {
+.module( "networkTroubleshooter", ["ngSanitize", "ngAnimate", "ngRoute","ngFacebook", "angularAwesomeSlider"] )
+.config(['$routeProvider','$locationProvider','$facebookProvider', function ($routeProvider, $locationProvider, $facebookProvider) {
+
+    $facebookProvider.setAppId(475318909316785);
+
     $routeProvider
         .when('/', {
             templateUrl: 'partials/welcome.html'
@@ -412,8 +656,8 @@ angular
             controller: 'contactController'
         })
         .when('/login', {
-            templateUrl: 'partials/welcome.html',
-            controller: 'loginController'
+            templateUrl : 'partials/login.html',
+            controller: 'loginController',
         })
         .when('/:page', {
             templateUrl: function (param) {
@@ -423,98 +667,214 @@ angular
     $locationProvider.html5Mode(true);
 }])
 
+
+.run(function($rootScope, $location, $timeout) {
+
 /*
 *
 *  Upgrade MDL Object within ng-view partial
 *
-*/
-.run(function($rootScope, $location, $timeout) {
+*/ 
     $rootScope.$on('$viewContentLoaded', function() {
         $timeout(function() {
             componentHandler.upgradeDom();
         },100);
     });
+
+/*
+*
+*  Load the facebook SDK asynchronously
+*
+*/ 
+    (function(){
+        // If we've already installed the SDK, we're done
+        if (document.getElementById('facebook-jssdk')) {return;}
+
+        // Get the first script element, which we'll use to find the parent node
+        var firstScriptElement = document.getElementsByTagName('script')[0];
+
+        // Create a new script element and set its id
+        var facebookJS = document.createElement('script'); 
+        facebookJS.id = 'facebook-jssdk';
+
+        // Set the new script's source to the source of the Facebook JS SDK
+        facebookJS.src = '//connect.facebook.net/en_US/all.js';
+
+        // Insert the Facebook JS SDK into the DOM
+        firstScriptElement.parentNode.insertBefore(facebookJS, firstScriptElement);
+    }());
+
 })
 
+.controller( "mainController", [ '$scope', 'UserIdentity', function( $scope,  UserIdentity ){
 
+    var navbarLayout = {};
 
-.controller( "mainController", [ '$scope', '$global', function( $scope, $global ){
-    $scope.navBarLayout = $global.getNavbar();
-}])
-
-.controller( "reportController", function( $scope , $enquiryHistory ){
-    $enquiryHistory.export();
-    $scope.enquiryExportResult = $enquiryHistory.getExportedEnquiryHistory();
-})
-
-
-angular
-.module( "networkTroubleshooter")
-.factory('$enquiryHistory', function(){ 
-
-    var enquiryHistory = [], enquiryExport;
-    return {
-
-        update: function(history) {
-            enquiryHistory = history;
-        },
-        export: function ( hasBeenExported ) {
-            var enquiry;
-            var length = enquiryHistory.length;
-            enquiryExport = [];
-            for (var i = 0; i < length ; i++) {
-                 enquiry = enquiryHistory[i];
-                 enquiryExport.push( {
-                    question: enquiry.title,
-                    answer: enquiry.situation[ enquiry.selected.index ].answer
-                });
-            };
-        },
-        getExportedEnquiryHistory: function () {
-            return enquiryExport;
+    navbarLayout[UserIdentity.unauthenticatedUser] = [
+        { 
+            title: '登入',
+            url: 'login'
         }
+    ];
+    navbarLayout[UserIdentity.authenticatedUser] = [
+        { 
+            title: '個人資料',
+            url: 'profile'
+        },
+        { 
+            title: '登出',
+            url: 'logout'
+        }
+    ];
+
+    $scope.navBar = navbarLayout;
+
+    $scope.currentUser = {
+        identity: UserIdentity.unauthenticatedUser
     };
-});
+
+    $scope.enquiryHistory = [];
+
+    $scope.setCurrentUser = function (user) {
+        $scope.currentUser = user;
+    };
+
+}]);
+
+
 
 angular
 .module( "networkTroubleshooter")
-.factory('$global', function(){
+
+.constant("API", {
+    base: "dntrs-tinray.rhcloud.com/api",
+    version: "1.0",
+    user: {
+      prefix: 'user',
+      postRequestBody: {
+        UpdateUserProfile: "current",
+        /* 
+         * Format: /user/current                                     
+         * Usage:  Update the profile of current login user
+         *
+         */
+        UpdateSingleUserProfile: "" 
+        /* 
+         * Format: /user/:prop/:value                                        
+         * Usage:  Update the profile of user(s) whose value of property :prop is :value.
+         *
+         */
+      },
+      getRequestBody: {
+        GetUserProfile: "current",
+        /* 
+         * Format: /user/current                                      
+         * Usage:  Get the profile of current login user.
+         *
+         */
+        GetSingleUserProfile: "", 
+        /* 
+         * Format: /user/:prop/:value                                        
+         * Usage:  Get the profile of user(s) whose value of property :prop is :value. 
+         *
+         */
+        GetAllUserSingleField: "" 
+      }
+    }
+})
+
+.constant("ProfilePatterns",{
+	'電話': /^\d{10}$/i,
+	'房號': /^\d{3}$/i,
+	'學號': /^\w\d{8}$/i
+})
+
+.constant("Schedule",{
+    startTime: 9.5,  /* Starts at 9 am */
+    endTime: 23.5,  /* Ends at 11 pm */
+
+    numOfDateToChooseFrom: 5,
+    numOfSchedule: 3
+})
+
+.constant("UserIdentity",{
+    unauthenticatedUser: 'x',
+    authenticatedUser: 'o'
+})
+
+.constant('AUTH_EVENTS', {
+  loginSuccess: 'auth-login-success',
+  loginFailed: 'auth-login-failed',
+  logoutSuccess: 'auth-logout-success',
+  sessionTimeout: 'auth-session-timeout',
+  notAuthenticated: 'auth-not-authenticated',
+  notAuthorized: 'auth-not-authorized'
+});
+angular
+.module( "networkTroubleshooter")
+.factory('Request',['$http', 'API', function($http, API){
+
+	var apiURL = [ API.base , API.version, API.user.prefix ].join('/');
+	
+	return {
+		getUserProfile: function () {
+			return $http.get( apiURL + API.GetUserProfile );
+		},
+		getSingleUserProfile: function (prop, value) {
+			return $http.get( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/') );
+		},
+		updateUserProfile: function (query) {
+			return $http.post( apiURL + API.UpdateUserProfile, query );
+		},
+		updateSingleUserProfile: function (query, prop, value) {
+			return $http.post( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/'), query );
+		}
+	};
+}]);
+angular
+.module( "networkTroubleshooter")
+.service("Session", function () {
+	
+	this.create = function (webToken, userId, userRole) {
+		this.token = webToken;
+		this.userId = userId;
+		this.userRole = userRole;
+	};
+	this.destroy = function () {
+		this.token = null;
+		this.userId = null;
+		this.userRole = null;
+	};
+});
+angular
+.module( "networkTroubleshooter")
+.factory('User', ['$facebook', 'UserIdentityConfig', function( $facebook, UserIdentityConfig ){
     
     var userIdentity = 'unauthenticated_user';
-    var user = {
-        unauthenticated_user: {
-            navbarLayout: [
-                { 
-                    title: '登入',
-                    url: 'login'
-                }
-            ]
-        },
-        authenticated_user: {
-            navbarLayout: [
-                { 
-                    title: '個人資料',
-                    url: 'profile'
-                },
-                { 
-                    title: '登出',
-                    url: 'logout'
-                }
-            ]
+
+    var loadAuthenticatedUser = function () {
+    	
+    };
+
+    return {
+    	login: function () {
+    		$facebook.login().then(function() {
+		    	loadAuthenticatedUser();
+		    });
+    	},
+        updateUserIdentity: function (identity) {
+        	userIdentity = identity;
         }
     };
 
-    var schedule = {
-        startTime: 9.5,  /* Starts at 9 am */
-        endTime: 23.5,  /* Ends at 11 pm */
+}]);
 
-        numOfDateToChooseFrom: 5,
-        numOfSchedule: 3
-    };
-
+angular
+.module( "networkTroubleshooter")
+.controller( "contactController", function( $scope ){
     /* A list of necessary result entry used in contact page */
     /* The name of entry must correspond to id of its ng-template */
-    var resultEntries = [
+    $scope.resultEntries = [
         { 
             id: 'redo',
             title: '重新進行疑難排解',
@@ -539,45 +899,10 @@ angular
         }
     ];
 
-    return {
-
-        getNavbar: function () {
-            return user[ userIdentity ].navbarLayout;
-        },  
-        getResultEntries: function () {
-            return resultEntries;
-        },
-        getSchedule: function () {
-            return schedule;
-        },
-        updateUserIdentity: function (identity) {
-            user.identity = identity;
-        }
-    };
-
-});
-
-angular
-.module( "networkTroubleshooter")
-.factory('$request', function(){
-
-
-});
-angular
-.module( "networkTroubleshooter")
-.controller( "contactController", function( $scope , $global ){
-    $scope.resultEntries = $global.getResultEntries();
     $scope.resultIndex = 0;
+
     var resultNumber = $scope.resultEntries.length;
     
-    var actions = {
-        troubleshoot: function () {
-            
-        },
-        send: function () {
-            
-        }
-    };
     var doAction = function () {
         // Check if there's any action to be done
         // when we enter a new page.
@@ -609,13 +934,39 @@ angular
 });
 angular
 .module( "networkTroubleshooter")
-.controller( "loginController", function( $scope , $global ){
+.controller( "loginController", function( $scope , $facebook , $location, UserIdentity ){
 
+	function getUserFacebookInfo () {
+		$facebook.api("/me").then( 
+			function(response) {
+				Request.getUserProfile(response.id).then(
+				// OK
+				function () {
+					
+				}, 
+				// Error
+				function () {
+					
+				})
+			},
+			function(err) {
+				$location.path('/');
+			}
+		);
+	}
+		
+	$scope.FBLogin = function () {
+		$facebook.login().then(function() {
+			getUserFacebookInfo();
+	    }, function () {
+			$location.path('/');
+		});
+	};
 });
 
 angular
 .module( "networkTroubleshooter")
-.controller('profileController', function($scope){
+.controller('profileController', ['$scope', 'ProfilePatterns', function( $scope, ProfilePatterns ){
 	$scope.profileFields = [
 		{
 			name: '真實姓名',
@@ -634,17 +985,12 @@ angular
 			value: '0988s282193'
 		}
 	];
-	$scope.patterns = {
-		'電話': /^\d{10}$/i,
-		'房號': /^\d{3}$/i,
-		'學號': /^\w\d{8}$/i,
-		'email':  /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i
-	};
+	$scope.profilePatterns = ProfilePatterns;
 
 	// $scope.profile = getProfile('user').setCache('xxProfile');
 
 	$scope.updateProfile = function () {
-		
+
 		// if( getCache('xxProfile') == $scope.profile ){
 		// 	// do http request
 		// }
@@ -652,7 +998,29 @@ angular
 		// 	// do nothing
 		// }
 	};
+}]);
+
+angular
+.module( "networkTroubleshooter" )
+.controller( "reportController", function( $scope ){
+
+    // Export the enquiry
+    
+    var enquiry;
+    var length = $scope.enquiryHistory.length;
+    enquiryExport = [];
+    for (var i = 0; i < length ; i++) {
+         enquiry = enquiryHistory[i];
+         enquiryExport.push( {
+            question: enquiry.title,
+            answer: enquiry.situation[ enquiry.selected.index ].answer
+        });
+    };
+
+    $scope.enquiryExportResult = enquiryExport;
+
 });
+
 
 function populateNextFewDays (numberOfDates) {
     var weekDayName = ['日','一','二','三','四','五','六'];
@@ -706,16 +1074,14 @@ function transformTime(time) {
 
 angular
 .module( "networkTroubleshooter")
-.controller( "timepickerController", [ '$scope', '$global', function( $scope, $global ){
-
-    var schedule = $global.getSchedule();
+.controller( "timepickerController", [ '$scope', 'Schedule', function( $scope, Schedule ){
 
     $scope.selectDate = function (_schedule, selectedDate) {
         _schedule['date'] = selectedDate;
     };
     
-    $scope.dates = populateNextFewDays(schedule.numOfDateToChooseFrom);
-    $scope.availableSchedules = populateSchedule(schedule);
+    $scope.dates = populateNextFewDays(Schedule.numOfDateToChooseFrom);
+    $scope.availableSchedules = populateSchedule(Schedule);
     $scope.scheduleSliderOptions = {
         from: 0,
         to: 24,
@@ -729,19 +1095,12 @@ angular
 }]);
 angular
 .module( "networkTroubleshooter")
-.controller( "troubleshooterController", function( $scope, $rootScope, $location, $enquiryHistory ){
+.controller( "troubleshooterController", function( $scope, $location, EnquiryHistory ){
 
-    $scope.enquiryHistory = [];
     $scope.currentEnquiry = model.issueList.issue;
     $scope.currentEnquiryID = 'issue';
-    $rootScope.exportEnquiries = {};
 
     $scope.gotoNextPage = function (url) {
-
-        // Troubleshooter is done
-        // Prepare for export
-        $enquiryHistory.update( $scope.enquiryHistory );
-        
         $location.path(url);
     };
 

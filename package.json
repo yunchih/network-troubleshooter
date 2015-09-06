@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/CTinRay/network-troubleshooter.git"
+    "url": "git://github.com/yunchih/network-troubleshooter.git"
   },
   "keywords": [
     "network",
@@ -17,7 +17,7 @@
   "author": "Yun-Chih Chen, Tin-Ray Chang",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/CTinRay/network-troubleshooter/issues"
+    "url": "https://github.com/yunchih/network-troubleshooter/issues"
   },
   "dependencies": {
     "express": "~4.13.3",

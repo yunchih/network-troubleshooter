@@ -1,6 +1,6 @@
 angular
 .module( "networkTroubleshooter")
-.controller('profileController', function($scope){
+.controller('profileController', ['$scope', 'ProfilePatterns', function( $scope, ProfilePatterns ){
 	$scope.profileFields = [
 		{
 			name: '真實姓名',
@@ -19,17 +19,12 @@ angular
 			value: '0988s282193'
 		}
 	];
-	$scope.patterns = {
-		'電話': /^\d{10}$/i,
-		'房號': /^\d{3}$/i,
-		'學號': /^\w\d{8}$/i,
-		'email':  /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i
-	};
+	$scope.profilePatterns = ProfilePatterns;
 
 	// $scope.profile = getProfile('user').setCache('xxProfile');
 
 	$scope.updateProfile = function () {
-		
+
 		// if( getCache('xxProfile') == $scope.profile ){
 		// 	// do http request
 		// }
@@ -37,4 +32,4 @@ angular
 		// 	// do nothing
 		// }
 	};
-});
+}]);

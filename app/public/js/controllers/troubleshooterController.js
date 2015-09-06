@@ -1,18 +1,11 @@
 angular
 .module( "networkTroubleshooter")
-.controller( "troubleshooterController", function( $scope, $rootScope, $location, $enquiryHistory ){
+.controller( "troubleshooterController", function( $scope, $location, EnquiryHistory ){
 
-    $scope.enquiryHistory = [];
     $scope.currentEnquiry = model.issueList.issue;
     $scope.currentEnquiryID = 'issue';
-    $rootScope.exportEnquiries = {};
 
     $scope.gotoNextPage = function (url) {
-
-        // Troubleshooter is done
-        // Prepare for export
-        $enquiryHistory.update( $scope.enquiryHistory );
-        
         $location.path(url);
     };
 

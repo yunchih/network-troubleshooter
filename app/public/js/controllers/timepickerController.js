@@ -51,16 +51,14 @@ function transformTime(time) {
 
 angular
 .module( "networkTroubleshooter")
-.controller( "timepickerController", [ '$scope', '$global', function( $scope, $global ){
-
-    var schedule = $global.getSchedule();
+.controller( "timepickerController", [ '$scope', 'Schedule', function( $scope, Schedule ){
 
     $scope.selectDate = function (_schedule, selectedDate) {
         _schedule['date'] = selectedDate;
     };
     
-    $scope.dates = populateNextFewDays(schedule.numOfDateToChooseFrom);
-    $scope.availableSchedules = populateSchedule(schedule);
+    $scope.dates = populateNextFewDays(Schedule.numOfDateToChooseFrom);
+    $scope.availableSchedules = populateSchedule(Schedule);
     $scope.scheduleSliderOptions = {
         from: 0,
         to: 24,
