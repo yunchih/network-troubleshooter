@@ -1,30 +1,75 @@
 angular
 .module( "networkTroubleshooter")
-.factory('User', ['$facebook', 'UserIdentity', 'Session', function( $facebook, UserIdentity, Session ){
+.factory('User', ['$facebook', 'UserIdentity', 'Request', function( $facebook, UserIdentity, Request ){
     
-    var authenticated = false;
+    var identity = User.NotLoggedIn;
     var profilePromise = undefined;
-    var profile = null;
+    var profile = {};
     return {
     	hasLoggedIn: function () {
-            return loggedIn;  
+            return identity == User.LoggedIn;
         },
-        getIdentity: function (_profile) {
-        	return _profile ? UserIdentity.unauthenticatedUser : UserIdentity.unauthenticatedUser;
+        hasRegistered: function () {
+            return identity == User.LoggedInNotRegistered;
         },
-        getProfile: function() {
+        loginBackend: function () {
+            Request.login().then(function (response) {
+                if( !response.registered ){
+                    identity = User.LoggedInNotRegistered;
+                }
+                else{
+                    identity = User.LoggedIn;
+                }
+            });
+        },
+        setIdentity: function (_identity) {
+            identity = _identity;
+        },
+        setProfile: function (_profile) {
+            profile = _profile;
+        },
+        getIdentity: function () {
+        	return identity;
+        },
+        getProfile: function () {
+            return profile;
+        },
+        initializeProfile: function() {
             if(!profilePromise || !authenticated) {
-                profilePromise = Request.getUserProfile().then(
+                profilePromise = Request.initializeUserProfile().then(
                 function(response) {
-                    authenticated = true;
                     profile = response.data;
                     return profile;
                 },function(rejection) {  // error
-                    authenticated = false;
+                    console.log("Fail retrieving profile from backend");
                     return $q.reject(rejection);
                 });
             }
             return profilePromise;
+        },
+        getNavBarLayout: function () {
+            var navbarLayout = {};
+
+            navbarLayout[User.NotLoggedIn] = [
+                { 
+                    title: '登入',
+                    url: 'login'
+                }
+            ];
+            navbarLayout[User.LoggedIn] = [
+                { 
+                    title: '個人資料',
+                    url: 'profile'
+                },
+                { 
+                    title: '登出',
+                    url: 'logout'
+                }
+            ];
+
+            navbarLayout[User.LoggedInNotRegistered] = navbarLayout[User.LoggedIn];
+
+            return navbarLayout;
         }
     };
 

@@ -8,17 +8,26 @@ angular
 		getJWT: function (fbID) {
 			return $http.get( apiURL + '?fb_id=' + fbID );
 		},
+		initializeUserProfile: function () {
+			return $http({
+			    method: 'GET',
+			    url: apiURL + '/' + API.GetUserProfile,
+			    ignoreExpiration: true
+			});
+		}
 		getUserProfile: function () {
-			return $http.get( apiURL + API.GetUserProfile );
+			return $http.get( apiURL + '/' + API.GetUserProfile );
 		},
 		getSingleUserProfile: function (prop, value) {
-			// return $http.get( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/') );
+			var url = [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/');
+			return $http.get(url);
 		},
 		updateUserProfile: function (query) {
-			return $http.post( apiURL + API.UpdateUserProfile, query );
+			return $http.post( apiURL + '/' + API.UpdateUserProfile, query );
 		},
 		updateSingleUserProfile: function (query, prop, value) {
-			// return $http.post( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/'), query );
+			var url = [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/');
+			return $http.post( url , query );
 		}
 	};
 }]);

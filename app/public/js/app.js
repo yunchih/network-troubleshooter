@@ -17,12 +17,7 @@ angular
 
     $routeProvider
         .when('/', {
-            templateUrl: 'partials/welcome.html'
-            resolve: {
-                UserProfile: function (User) {
-                    return User.getProfile();                    
-                }
-            }
+            templateUrl: 'partials/welcome.html',
         })
         .when('/:page', {
             templateUrl: function (param) {
@@ -47,14 +42,10 @@ angular
                     The user is accessing restricted API or his API has expired 
                 */
                 if (rejection.status === 401 || rejection.status === 403) {
-                    if( User.hasLoggedIn() ){
+                    if( !rejection.config.ignoreExpiration ){
                         Session.destroy();
                         $location.path('/signin');
                     }
-                    else {
-                        $location.path('/');
-                    }
-                        
                 }
                 return $q.reject(rejection);
             }
@@ -108,38 +99,24 @@ angular
     
 })
         
-.controller( "mainController", [ '$scope', 'UserProfile', function( $scope,  UserProfile, UserIdentity ){
+.controller( "mainController", [ '$scope', 'User', function( $scope, User ){
 
-    var navbarLayout = {};
-
-    navbarLayout[UserIdentity.unauthenticatedUser] = [
-        { 
-            title: '登入',
-            url: 'login'
-        }
-    ];
-    navbarLayout[UserIdentity.authenticatedUser] = [
-        { 
-            title: '個人資料',
-            url: 'profile'
-        },
-        { 
-            title: '登出',
-            url: 'logout'
-        }
-    ];
-
-    $scope.navBar = navbarLayout;
+    $scope.navBar = User.getNavBarLayout();
 
     $scope.currentUser = {
-        // User.getIdentity(UserProfile) 
-        identity:  UserIdentity.unauthenticatedUser
+        identity: User.getIdentity();
     };
+
+    User.initializeProfile().then( function () {
+        // Update User Identity
+        $scope.currentUser.identity = User.getIdentity();
+    });
 
     $scope.enquiryHistory = [];
 
     $scope.setCurrentUser = function (user) {
         $scope.currentUser = user;
+        $scope.currentUser = User.getIdentity();
     };
 
 }]);

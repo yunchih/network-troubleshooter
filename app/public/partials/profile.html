@@ -61,24 +61,24 @@
 </style>
 <div class="mdl-card mdl-shadow--2dp" id="profile" ng-controller="profileController">
 	<div class="mdl-card__title">
-		<h1 class="accent" id="username">陳耘志</h1>
+		<h1 class="accent" id="username">{{ currentUser.name }}</h1>
 	</div>
 	<form name="profileForm" novalidate ng-submit="profileForm.$valid && updateProfile()" >
 
 		<div id="form-body">
-			<div class="field" ng-repeat="field in profileFields">
+			<div class="field" ng-repeat="(fieldKey, fieldName) in fieldMappings">
 				<ng-form name="profileField">
 					<span 
 						class="field-name"
 						ng-class="{ 'input-has-error' : profileField.field.$invalid }">
-						{{ field.name }}
+						{{ fieldName }}
 					</span>
 					<div class="field-input mdl-textfield mdl-js-textfield">
 						<input class="mdl-textfield__input" 
 						type="text" 
 						name="field" 
-						ng-model="field.value" 
-						ng-pattern="patterns[field.name]"
+						ng-model="profile[ fieldKey ]" 
+						ng-pattern="patterns[ fieldName ]"
 						ng-class="{ 'input-has-error' : profileField.field.$invalid }"
 						required/>
 					</div>

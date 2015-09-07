@@ -1,35 +1,14 @@
 angular
 .module( "networkTroubleshooter")
-.controller('profileController', ['$scope', 'ProfilePatterns', function( $scope, ProfilePatterns ){
-	$scope.profileFields = [
-		{
-			name: '真實姓名',
-			value: '陳耘志'
-		},
-		{
-			name: '學號',
-			value: 'B039020741'
-		},
-		{
-			name: '房號',
-			value: '239'
-		},
-		{
-			name: '電話',
-			value: '0988s282193'
-		}
-	];
-	$scope.profilePatterns = ProfilePatterns;
+.controller('profileController', ['$scope', '$routeParams', 'Profile','User', function( $scope, $routeParams, Profile, User ){
 
-	// $scope.profile = getProfile('user').setCache('xxProfile');
+	// Even if we got an empty object from 'User.getProfile()', 
+	// Angular will still propogate any new edit onto the object.
+	$scope.profile = User.getProfile();
+	$scope.fieldMappings = Profile.mappings;
+	$scope.profilePatterns = Profile.patterns;
 
 	$scope.updateProfile = function () {
-
-		// if( getCache('xxProfile') == $scope.profile ){
-		// 	// do http request
-		// }
-		// else {
-		// 	// do nothing
-		// }
+		User.setProfile($scope.profile);
 	};
 }]);

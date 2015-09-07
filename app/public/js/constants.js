@@ -53,8 +53,9 @@ angular
 })
 
 .constant("UserIdentity",{
-    unauthenticatedUser: 'x',
-    authenticatedUser: 'o'
+    NotLoggedIn: 'x',
+    LoggedIn: 'o',
+    LoggedInNotRegistered: 'r'
 })
 
 .constant('AUTH_EVENTS', {

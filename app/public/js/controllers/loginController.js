@@ -1,46 +1,44 @@
 angular
 .module( "networkTroubleshooter")
-.controller( "loginController", function( $scope , $facebook , $location, UserIdentity ){
+.controller( "loginController", function( $scope , $facebook , $location , User , UserIdentity ){
 
 	function getUserFacebookInfo () {
 		$facebook.api("/me").then( 
 			function(response) {
+				// Set User's FB Data
+				// which contains { name: 'xxx', id: 'xxx' }
+				$scope.setCurrentUser(response);
 
-				var data = { identity: UserIdentity.authenticatedUser };
+				User.loginBackend().then(
+					function (response) {
+						
+						Session.store( response.data.access_token );
 
-				angular.extend(data, response);
+						if( !response.registered ){
+							$location.path('/profile');
+						}
+						else {
+							$location.path('/');
+						}
+					},
+					function () {
+						console.log("checkRegistered Failed");
+					}
+				);
 				
-				$scope.setCurrentUser(data);
-
 			},
 			function(err) {
+				// Fail to retrieve user data from FB
 				$location.path('/');
 			}
 		);
-		/*
-		$facebook.api("/me").then( 
-			function(response) {
-				Request.getJWT(response.id).then(
-				// OK
-				function (res) {
-
-				}, 
-				// Error
-				function () {
-					
-				})
-			},
-			function(err) {
-				$location.path('/');
-			}
-		);
-*/
 	}
 		
 	$scope.FBLogin = function () {
 		$facebook.login().then(function() {
 			getUserFacebookInfo();
 	    }, function () {
+	    	// Fail to login to FB
 			$location.path('/');
 		});
 	};

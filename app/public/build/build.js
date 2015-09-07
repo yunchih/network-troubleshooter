@@ -662,12 +662,7 @@ angular
 
     $routeProvider
         .when('/', {
-            templateUrl: 'partials/welcome.html'
-            resolve: {
-                UserProfile: function (User) {
-                    return User.getProfile();                    
-                }
-            }
+            templateUrl: 'partials/welcome.html',
         })
         .when('/:page', {
             templateUrl: function (param) {
@@ -692,14 +687,10 @@ angular
                     The user is accessing restricted API or his API has expired 
                 */
                 if (rejection.status === 401 || rejection.status === 403) {
-                    if( User.hasLoggedIn() ){
+                    if( !rejection.config.ignoreExpiration ){
                         Session.destroy();
                         $location.path('/signin');
                     }
-                    else {
-                        $location.path('/');
-                    }
-                        
                 }
                 return $q.reject(rejection);
             }
@@ -753,38 +744,24 @@ angular
     
 })
         
-.controller( "mainController", [ '$scope', 'UserProfile', function( $scope,  UserProfile, UserIdentity ){
+.controller( "mainController", [ '$scope', 'User', function( $scope, User ){
 
-    var navbarLayout = {};
-
-    navbarLayout[UserIdentity.unauthenticatedUser] = [
-        { 
-            title: '登入',
-            url: 'login'
-        }
-    ];
-    navbarLayout[UserIdentity.authenticatedUser] = [
-        { 
-            title: '個人資料',
-            url: 'profile'
-        },
-        { 
-            title: '登出',
-            url: 'logout'
-        }
-    ];
-
-    $scope.navBar = navbarLayout;
+    $scope.navBar = User.getNavBarLayout();
 
     $scope.currentUser = {
-        // User.getIdentity(UserProfile) 
-        identity:  UserIdentity.unauthenticatedUser
+        identity: User.getIdentity();
     };
+
+    User.initializeProfile().then( function () {
+        // Update User Identity
+        $scope.currentUser.identity = User.getIdentity();
+    });
 
     $scope.enquiryHistory = [];
 
     $scope.setCurrentUser = function (user) {
         $scope.currentUser = user;
+        $scope.currentUser = User.getIdentity();
     };
 
 }]);
@@ -846,8 +823,9 @@ angular
 })
 
 .constant("UserIdentity",{
-    unauthenticatedUser: 'x',
-    authenticatedUser: 'o'
+    NotLoggedIn: 'x',
+    LoggedIn: 'o',
+    LoggedInNotRegistered: 'r'
 })
 
 .constant('AUTH_EVENTS', {
@@ -868,87 +846,117 @@ angular
 		getJWT: function (fbID) {
 			return $http.get( apiURL + '?fb_id=' + fbID );
 		},
+		initializeUserProfile: function () {
+			return $http({
+			    method: 'GET',
+			    url: apiURL + '/' + API.GetUserProfile,
+			    ignoreExpiration: true
+			});
+		}
 		getUserProfile: function () {
-			return $http.get( apiURL + API.GetUserProfile );
+			return $http.get( apiURL + '/' + API.GetUserProfile );
 		},
 		getSingleUserProfile: function (prop, value) {
-			// return $http.get( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/') );
+			var url = [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/');
+			return $http.get(url);
 		},
 		updateUserProfile: function (query) {
-			return $http.post( apiURL + API.UpdateUserProfile, query );
+			return $http.post( apiURL + '/' + API.UpdateUserProfile, query );
 		},
 		updateSingleUserProfile: function (query, prop, value) {
-			// return $http.post( [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/'), query );
+			var url = [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/');
+			return $http.post( url , query );
 		}
 	};
 }]);
 angular
 .module( "networkTroubleshooter")
-.factory("Session", function ($cookieStore) {
+.service("Session", function ($cookieStore) {
 	
-	var token = $cookieStore.get('token');
-	var userId = $cookieStore.get('id');
-	var profilePromise = null;
+	this.token = $cookieStore.get('token');
 
-	return {
-		getToken: function () {
-			return this.token || $cookieStore.get('token');
-		},
-		getID: function () {
-			return this.userId || $cookieStore.get('id');
-		},
-		storeProfile: function ( _profilePromise ) {
-			profilePromise = _profilePromise;
-		}, 
-		getProfile: function () {
-			var actualProfile = {};
-			profilePromise.then(function () {
-				
-			})
-		}
-		create: function (webToken, userId) {
-			this.token = webToken;
-			this.userId = userId;
-			$cookieStore.put('token',webToken);
-			$cookieStore.put('id',userId);
-		},
-		destroy: function () {
-			this.token = null;
-			this.userId = null;
-			$cookieStore.remove('token');
-			$cookieStore.remove('id');
-		}
-	}
-		
+	this.store = function (webToken) {
+		this.token = webToken;
+		$cookieStore.put('token',webToken);
+	};
+	this.destroy = function () {
+		this.token = null;
+		$cookieStore.remove('token');
+	};
 		
 });
 angular
 .module( "networkTroubleshooter")
-.factory('User', ['$facebook', 'UserIdentity', 'Session', function( $facebook, UserIdentity, Session ){
+.factory('User', ['$facebook', 'UserIdentity', 'Request', function( $facebook, UserIdentity, Request ){
     
-    var authenticated = false;
+    var identity = User.NotLoggedIn;
     var profilePromise = undefined;
-    var profile = null;
+    var profile = {};
     return {
     	hasLoggedIn: function () {
-            return loggedIn;  
+            return identity == User.LoggedIn;
         },
-        getIdentity: function (_profile) {
-        	return _profile ? UserIdentity.unauthenticatedUser : UserIdentity.unauthenticatedUser;
+        hasRegistered: function () {
+            return identity == User.LoggedInNotRegistered;
         },
-        getProfile: function() {
+        loginBackend: function () {
+            Request.login().then(function (response) {
+                if( !response.registered ){
+                    identity = User.LoggedInNotRegistered;
+                }
+                else{
+                    identity = User.LoggedIn;
+                }
+            });
+        },
+        setIdentity: function (_identity) {
+            identity = _identity;
+        },
+        setProfile: function (_profile) {
+            profile = _profile;
+        },
+        getIdentity: function () {
+        	return identity;
+        },
+        getProfile: function () {
+            return profile;
+        },
+        initializeProfile: function() {
             if(!profilePromise || !authenticated) {
-                profilePromise = Request.getUserProfile().then(
+                profilePromise = Request.initializeUserProfile().then(
                 function(response) {
-                    authenticated = true;
                     profile = response.data;
                     return profile;
                 },function(rejection) {  // error
-                    authenticated = false;
+                    console.log("Fail retrieving profile from backend");
                     return $q.reject(rejection);
                 });
             }
             return profilePromise;
+        },
+        getNavBarLayout: function () {
+            var navbarLayout = {};
+
+            navbarLayout[User.NotLoggedIn] = [
+                { 
+                    title: '登入',
+                    url: 'login'
+                }
+            ];
+            navbarLayout[User.LoggedIn] = [
+                { 
+                    title: '個人資料',
+                    url: 'profile'
+                },
+                { 
+                    title: '登出',
+                    url: 'logout'
+                }
+            ];
+
+            navbarLayout[User.LoggedInNotRegistered] = navbarLayout[User.LoggedIn];
+
+            return navbarLayout;
         }
     };
 
@@ -1019,47 +1027,45 @@ angular
 });
 angular
 .module( "networkTroubleshooter")
-.controller( "loginController", function( $scope , $facebook , $location, UserIdentity ){
+.controller( "loginController", function( $scope , $facebook , $location , User , UserIdentity ){
 
 	function getUserFacebookInfo () {
 		$facebook.api("/me").then( 
 			function(response) {
+				// Set User's FB Data
+				// which contains { name: 'xxx', id: 'xxx' }
+				$scope.setCurrentUser(response);
 
-				var data = { identity: UserIdentity.authenticatedUser };
+				User.loginBackend().then(
+					function (response) {
+						
+						Session.store( response.data.access_token );
 
-				angular.extend(data, response);
+						if( !response.registered ){
+							$location.path('/profile');
+						}
+						else {
+							$location.path('/');
+						}
+					},
+					function () {
+						console.log("checkRegistered Failed");
+					}
+				);
 				
-				$scope.setCurrentUser(data);
-
 			},
 			function(err) {
+				// Fail to retrieve user data from FB
 				$location.path('/');
 			}
 		);
-		/*
-		$facebook.api("/me").then( 
-			function(response) {
-				Request.getJWT(response.id).then(
-				// OK
-				function (res) {
-
-				}, 
-				// Error
-				function () {
-					
-				})
-			},
-			function(err) {
-				$location.path('/');
-			}
-		);
-*/
 	}
 		
 	$scope.FBLogin = function () {
 		$facebook.login().then(function() {
 			getUserFacebookInfo();
 	    }, function () {
+	    	// Fail to login to FB
 			$location.path('/');
 		});
 	};
@@ -1067,37 +1073,16 @@ angular
 
 angular
 .module( "networkTroubleshooter")
-.controller('profileController', ['$scope', 'ProfilePatterns', function( $scope, ProfilePatterns ){
-	$scope.profileFields = [
-		{
-			name: '真實姓名',
-			value: '陳耘志'
-		},
-		{
-			name: '學號',
-			value: 'B039020741'
-		},
-		{
-			name: '房號',
-			value: '239'
-		},
-		{
-			name: '電話',
-			value: '0988s282193'
-		}
-	];
-	$scope.profilePatterns = ProfilePatterns;
+.controller('profileController', ['$scope', '$routeParams', 'Profile','User', function( $scope, $routeParams, Profile, User ){
 
-	// $scope.profile = getProfile('user').setCache('xxProfile');
+	// Even if we got an empty object from 'User.getProfile()', 
+	// Angular will still propogate any new edit onto the object.
+	$scope.profile = User.getProfile();
+	$scope.fieldMappings = Profile.mappings;
+	$scope.profilePatterns = Profile.patterns;
 
 	$scope.updateProfile = function () {
-
-		// if( getCache('xxProfile') == $scope.profile ){
-		// 	// do http request
-		// }
-		// else {
-		// 	// do nothing
-		// }
+		User.setProfile($scope.profile);
 	};
 }]);
 
