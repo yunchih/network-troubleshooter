@@ -19,6 +19,11 @@
         <script src="build/issues.min.js"></script> 
         <script src="build/build.js"></script> 
 
+        <!-- Development dependencies 
+        <script src="https://code.angularjs.org/1.2.17/angular-mocks.js" data-semver="1.2.17" data-require="angular-mocks@1.2.17"></script>
+        <script data-require="angular-resource@1.2.17" data-semver="1.2.17" src="http://code.angularjs.org/1.2.17/angular-resource.js"></script>
+         -->
+
         <title>男一舍網路維修系統</title>
         <base href="/">
     </head>
@@ -29,10 +34,11 @@
 
         <div class="mdl-layout mdl-js-layout mdl-layout--fixed-header mdl-layout__header--waterfall">
             <div class="mdl-layout__drawer mdl-layout--small-screen-only">
-                <span ng-if="currentUser.name" class="mdl-layout-title">
-                    {{ currentUser.name }}
-                </span>
+                
                 <nav class="mdl-navigation">
+                    <a href="profile" ng-if="currentUser.name" id="username" class="navigation__link">
+                        {{ currentUser.name }}
+                    </a>
                     <a ng-repeat="nav in navBar[ currentUser.identity ]" class="mdl-navigation__link"  href="{{ nav.url }}">  
                             {{ nav.title }}
                     </a>
@@ -40,14 +46,13 @@
             </div>
             <header class="mdl-layout__header">
                 <div class="mdl-layout__header-row">
-                    <img id="logo" src="" alt="">
                     <span class="mdl-layout-title"><a id="brand" href="/">男一舍網路維修系統</a></span>
 
                     <div class="mdl-layout-spacer"></div>
-                    <span ng-if="currentUser.name" class="mdl-layout-title">
-                        {{ currentUser.name }}
-                    </span>
                     <nav class="mdl-navigation mdl-layout--large-screen-only">
+                        <a href="profile" ng-if="currentUser.name" id="username" class="navigation__linke">
+                            {{ currentUser.name }}
+                        </a>
                         <a ng-repeat="nav in navBar[ currentUser.identity ]" class="mdl-navigation__link"  href="{{ nav.url }}">  
                             {{ nav.title }}
                         </a>

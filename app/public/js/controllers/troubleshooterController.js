@@ -27,6 +27,7 @@ angular
     };
 
     $scope.showGuide = function (guide) {
+        console.log("Show guide");
         $scope.guide_url = 'partials/' +  guide.url ;
         $scope.guide_name = guide.name;
     };

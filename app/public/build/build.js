@@ -654,6 +654,7 @@ angular
     "ngRoute",
     "ngFacebook", 
     "ngCookies",
+    /*"ngMockE2E", *//* Development Usage */
     "angularAwesomeSlider"] )
 .config(['$routeProvider','$locationProvider','$httpProvider', '$facebookProvider', function ($routeProvider, $locationProvider, $httpProvider, $facebookProvider) {
 
@@ -672,17 +673,13 @@ angular
 
     $httpProvider.interceptors.push(['$q', '$location', 'Session', function ($q, $location, Session) {
         return {
-            'request': function (config) {
-                /*
-                    Attach JWT Token to every outgoing request
-                */
-                config.headers = config.headers || {};
-                if (Session.token) {
-                    config.headers.Authorization = 'Bearer ' + Session.token;
-                }
+            request: function (config) {
+                console.log("Sending request to " + config.url);
                 return config;
             },
             'responseError': function (rejection) {
+
+                console.log("Running into error! ", rejection);
                 /* 
                     The user is accessing restricted API or his API has expired 
                 */
@@ -711,6 +708,30 @@ angular
         $timeout(function() {
             componentHandler.upgradeDom();
         },100);
+    });
+/*
+*
+*  Restrict routing access to certain pages.
+*
+*/ 
+
+    var getLastUrlSegment = function (fullURL) {
+        var urlFragments = fullURL.split('/');
+        return urlFragments[ urlFragments.length - 1 ];
+    };
+
+    $rootScope.$on('$locationChangeStart', function (event, nextURL, previousURL) {
+        if( User.hasLoggedIn() ){
+            
+            if( RestrictedRoute.indexOf(getLastUrlSegment(nextURL)) != -1 ){
+
+                /* Save user's location to take him back to the same page after he has logged in */
+                $rootScope.savedLocation = '/' + getLastUrlSegment(previousURL);
+
+                $location.path('/login');
+
+            }
+        }
     });
 
 /*
@@ -746,23 +767,29 @@ angular
         
 .controller( "mainController", [ '$scope', 'User', function( $scope, User ){
 
+    var setCurrentUser = function (user) {
+        $scope.currentUser = user;
+        $scope.currentUser.identity = User.getIdentity();
+    };
+
     $scope.navBar = User.getNavBarLayout();
 
     $scope.currentUser = {
-        identity: User.getIdentity();
+        identity: User.getIdentity()
     };
 
-    User.initializeProfile().then( function () {
-        // Update User Identity
-        $scope.currentUser.identity = User.getIdentity();
-    });
+    // User.initializeProfile().then( function (profile) {
+    //     // Update User Data
+    //     // Name, FB_ID, Identity
+    //     setCurrentUser(profile);
+    //     console.log("Initialize User Profile___Success!");
+    // }, function (error) {
+    //     console.log("Initialize User Profile___Failed!",error);
+    // });
 
     $scope.enquiryHistory = [];
 
-    $scope.setCurrentUser = function (user) {
-        $scope.currentUser = user;
-        $scope.currentUser = User.getIdentity();
-    };
+    $scope.setCurrentUser = setCurrentUser;
 
 }]);
 
@@ -771,47 +798,61 @@ angular
 angular
 .module( "networkTroubleshooter")
 
+.constant("Testing",false)
+
 .constant("API", {
-    base: "dntrs-tinray.rhcloud.com/api",
+    base: "http://140.112.196.15:3000/api",
     version: "1.0",
-    user: {
-      prefix: 'user',
-      postRequestBody: {
-        UpdateUserProfile: "current",
+    api: {
+        Login: "auth/login",
+        /* 
+         * Format: /auth/login                                     
+         * Usage:  Login.  Return JWT to users
+         * Method: POST
+         */
+        UpdateUserProfile: "user/current",
         /* 
          * Format: /user/current                                     
          * Usage:  Update the profile of current login user
-         *
+         * Method: POST
          */
-        UpdateSingleUserProfile: "" 
+        UpdateSingleUserProfile: "user" ,
         /* 
          * Format: /user/:prop/:value                                        
          * Usage:  Update the profile of user(s) whose value of property :prop is :value.
-         *
+         * Method: POST
          */
-      },
-      getRequestBody: {
-        GetUserProfile: "current",
+        GetUserProfile: "user/current",
         /* 
          * Format: /user/current                                      
          * Usage:  Get the profile of current login user.
-         *
+         * Method: GET
          */
-        GetSingleUserProfile: "", 
+        GetSingleUserProfile: "user", 
         /* 
          * Format: /user/:prop/:value                                        
          * Usage:  Get the profile of user(s) whose value of property :prop is :value. 
-         *
+         * Method: GET
          */
-        GetAllUserSingleField: "" 
-      }
+        GetAllUserSingleField: "user" 
     }
 })
-
-.constant("ProfilePatterns",{
-	'電話': /^\d{10}$/i,
-	'房號': /^\d{3}$/i,
-	'學號': /^\w\d{8}$/i
+.constant("RestrictedRoute",[
+  ['profile']
+])
+.constant("Profile",{
+  patterns: {
+    '電話': /^\d{10}$/i,
+    '房號': /^\d{3}$/i,
+    '學號': /^\w\d{8}$/i
+  },
+  mappings: {
+    name: '真實姓名',
+    room_number: '房號',
+    student_id: '學號',
+    phone_number: '電話'
+  }
+  	
 })
 
 .constant("Schedule",{
@@ -838,34 +879,56 @@ angular
 });
 angular
 .module( "networkTroubleshooter")
-.factory('Request',['$http', 'API', function($http, API){
+.factory('Request',['$http', 'API', 'Session', function($http, API, Session){
 
-	var apiURL = [ API.base , API.version, API.user.prefix ].join('/');
+	var apiBase = [ API.base , API.version ].join('/');
+	var api = API.api;
+	
+	var getAccessToken = function () {
+		var headers = {}
+        if (Session.token) {
+            headers.Authorization = 'Bearer ' + Session.token;
+        }
+        return headers;
+	};
+
+	var GET_request = function (url_body) {
+		return $http({
+		    method: 'GET',
+		    url: apiBase + '/' + url_body,
+		    headers: getAccessToken()
+		});
+	};
+
+	var POST_request = function (url_body, data) {
+		return $http({
+		    method: 'GET',
+		    url: apiBase + '/' + url_body,
+		    headers: getAccessToken(),
+		    data: data
+		});
+	};
 
 	return {
-		getJWT: function (fbID) {
-			return $http.get( apiURL + '?fb_id=' + fbID );
+		login: function (userCredential) {
+			return POST_request( api.Login, userCredential );
 		},
-		initializeUserProfile: function () {
-			return $http({
-			    method: 'GET',
-			    url: apiURL + '/' + API.GetUserProfile,
-			    ignoreExpiration: true
-			});
-		}
-		getUserProfile: function () {
-			return $http.get( apiURL + '/' + API.GetUserProfile );
-		},
-		getSingleUserProfile: function (prop, value) {
-			var url = [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/');
-			return $http.get(url);
-		},
-		updateUserProfile: function (query) {
-			return $http.post( apiURL + '/' + API.UpdateUserProfile, query );
+		updateUserProfile: function (profile) {
+			return POST_request( api.UpdateUserProfile, profile );
 		},
 		updateSingleUserProfile: function (query, prop, value) {
-			var url = [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/');
-			return $http.post( url , query );
+			var url = [ api.GetSingleUserProfile , prop , value ].join('/');
+			return POST_request( url , query );
+		},
+		initializeUserProfile: function () {
+			return GET_request( api.GetUserProfile ); 
+		},
+		getUserProfile: function () {
+			return GET_request( api.GetUserProfile );
+		},
+		getSingleUserProfile: function (prop, value) {
+			var url = [ api.GetSingleUserProfile , prop , value ].join('/');
+			return GET_request( url );
 		}
 	};
 }]);
@@ -887,25 +950,26 @@ angular
 });
 angular
 .module( "networkTroubleshooter")
-.factory('User', ['$facebook', 'UserIdentity', 'Request', function( $facebook, UserIdentity, Request ){
+.factory('User', ['$facebook','$q', 'UserIdentity', 'Request', function( $facebook, $q, UserIdentity, Request ){
     
-    var identity = User.NotLoggedIn;
+    var identity = UserIdentity.NotLoggedIn;
     var profilePromise = undefined;
     var profile = {};
     return {
     	hasLoggedIn: function () {
-            return identity == User.LoggedIn;
+            return identity != UserIdentity.NotLoggedIn;
         },
         hasRegistered: function () {
-            return identity == User.LoggedInNotRegistered;
+            return identity == UserIdentity.LoggedInNotRegistered;
         },
-        loginBackend: function () {
-            Request.login().then(function (response) {
-                if( !response.registered ){
-                    identity = User.LoggedInNotRegistered;
+        loginBackend: function (userFacebookCredential) {
+            return Request.login(userFacebookCredential).then(function (response) {
+                console.log("Login Backend response: ",response);
+                if( !response.data.registered ){
+                    identity = UserIdentity.LoggedInNotRegistered;
                 }
                 else{
-                    identity = User.LoggedIn;
+                    identity = UserIdentity.LoggedIn;
                 }
             });
         },
@@ -914,6 +978,9 @@ angular
         },
         setProfile: function (_profile) {
             profile = _profile;
+            Request.updateUserProfile().then(function () {
+               console.log("Successfully update user profile"); 
+            });
         },
         getIdentity: function () {
         	return identity;
@@ -923,9 +990,13 @@ angular
         },
         initializeProfile: function() {
             if(!profilePromise || !authenticated) {
+                var _user = this.getUser;
                 profilePromise = Request.initializeUserProfile().then(
                 function(response) {
+                    console.log("Successfully retrieving profile from backend",response);
                     profile = response.data;
+                    identity = UserIdentity.LoggedIn;
+                    // Send user's profile to Main controller
                     return profile;
                 },function(rejection) {  // error
                     console.log("Fail retrieving profile from backend");
@@ -937,24 +1008,20 @@ angular
         getNavBarLayout: function () {
             var navbarLayout = {};
 
-            navbarLayout[User.NotLoggedIn] = [
+            navbarLayout[UserIdentity.NotLoggedIn] = [
                 { 
                     title: '登入',
                     url: 'login'
                 }
             ];
-            navbarLayout[User.LoggedIn] = [
-                { 
-                    title: '個人資料',
-                    url: 'profile'
-                },
+            navbarLayout[UserIdentity.LoggedIn] = [
                 { 
                     title: '登出',
                     url: 'logout'
                 }
             ];
 
-            navbarLayout[User.LoggedInNotRegistered] = navbarLayout[User.LoggedIn];
+            navbarLayout[UserIdentity.LoggedInNotRegistered] = navbarLayout[UserIdentity.LoggedIn];
 
             return navbarLayout;
         }
@@ -1027,29 +1094,38 @@ angular
 });
 angular
 .module( "networkTroubleshooter")
-.controller( "loginController", function( $scope , $facebook , $location , User , UserIdentity ){
+.controller( "loginController", function( $scope, $rootScope , $facebook , $location , User ){
 
-	function getUserFacebookInfo () {
+	function getUserFacebookInfo (fb_access_token) {
 		$facebook.api("/me").then( 
 			function(response) {
 				// Set User's FB Data
 				// which contains { name: 'xxx', id: 'xxx' }
-				$scope.setCurrentUser(response);
+				$scope.setCurrentUser({ 
+					name: response.name,
+					fb_id: response.id 
+				});
 
-				User.loginBackend().then(
+				var userFacebookCredential = {
+					access_token: fb_access_token, 
+					fb_id: response.id 
+				};
+
+				User.loginBackend(userFacebookCredential).then(
 					function (response) {
 						
 						Session.store( response.data.access_token );
 
-						if( !response.registered ){
+						if( !response.data.registered ){
 							$location.path('/profile');
 						}
 						else {
-							$location.path('/');
+							// Take the user back to where he used to be.
+							$location.path( $rootScope.savedLocation );
 						}
 					},
-					function () {
-						console.log("checkRegistered Failed");
+					function (rejection) {
+						console.log("Invalid Facebook Credential!  Rejection message: ", rejection);
 					}
 				);
 				
@@ -1062,12 +1138,22 @@ angular
 	}
 		
 	$scope.FBLogin = function () {
-		$facebook.login().then(function() {
-			getUserFacebookInfo();
-	    }, function () {
-	    	// Fail to login to FB
-			$location.path('/');
-		});
+
+		console.log("Facebook____Login");
+
+		$facebook.login().then(
+			function(response) {
+			   if (response.authResponse) {
+					var access_token = $facebook.getAuthResponse()['accessToken'];
+					getUserFacebookInfo(access_token);
+			   } else {
+			    	console.log('User cancelled login or did not fully authorize.');
+			   }
+			}, 
+			function (rejection) {
+				console.log("Facebook login failed: ", rejection);
+			}
+		);
 	};
 });
 
@@ -1208,6 +1294,7 @@ angular
     };
 
     $scope.showGuide = function (guide) {
+        console.log("Show guide");
         $scope.guide_url = 'partials/' +  guide.url ;
         $scope.guide_name = guide.name;
     };
@@ -1215,6 +1302,46 @@ angular
 });
 
 
+angular
+.module( "networkTroubleshooter")
+.run(function($httpBackend, Testing, API) {
+
+	console.log("Testing status ",Testing);
+	if( !Testing )
+		return;
+
+	console.log("Start testing with Angular Mock");
+	
+	var mockUserProfile = {
+		name: '陳耘志',
+	    room_number: '239',
+	    student_id: 'B03902074',
+	    phone_number: '0978229545'
+	};
+
+	var mockJWT = '2c26b46b68ffc68ff99b453c1d30413413422d706483bfa0f98a5e886266e7ae';
+	
+	var apiURL = [ API.base , API.version, API.user.prefix ].join('/');
+	var GET    = API.user.getRequestBody;
+	var POST   = API.user.postRequestBody;
+
+	console.log("Running Testing Mock Backend");
+	// Login
+	$httpBackend.whenGET( apiURL + '/' + GET.Login ).respond(function(method, url, data, headers){
+		console.log("Backend_____login");
+	    return [200, {}, {}];
+	 });
+
+	// getUserProfile
+	$httpBackend.whenGET( apiURL + '/' + GET.GetUserProfile ).respond(function(method, url, data, headers){
+		console.log("Backend_____getUserProfile");
+	    return [200, mockUserProfile, {}];
+	 });
+
+	// Ignore other static files
+	$httpBackend
+		.whenGET(/\.html$/).passThrough();
+});
 /**
  * material-design-lite - Material Design Components in CSS, JS and HTML
  * @version v1.0.4

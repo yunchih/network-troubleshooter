@@ -1,33 +1,55 @@
 angular
 .module( "networkTroubleshooter")
-.factory('Request',['$http', 'API', function($http, API){
+.factory('Request',['$http', 'API', 'Session', function($http, API, Session){
 
-	var apiURL = [ API.base , API.version, API.user.prefix ].join('/');
+	var apiBase = [ API.base , API.version ].join('/');
+	var api = API.api;
+	
+	var getAccessToken = function () {
+		var headers = {}
+        if (Session.token) {
+            headers.Authorization = 'Bearer ' + Session.token;
+        }
+        return headers;
+	};
+
+	var GET_request = function (url_body) {
+		return $http({
+		    method: 'GET',
+		    url: apiBase + '/' + url_body,
+		    headers: getAccessToken()
+		});
+	};
+
+	var POST_request = function (url_body, data) {
+		return $http({
+		    method: 'GET',
+		    url: apiBase + '/' + url_body,
+		    headers: getAccessToken(),
+		    data: data
+		});
+	};
 
 	return {
-		getJWT: function (fbID) {
-			return $http.get( apiURL + '?fb_id=' + fbID );
+		login: function (userCredential) {
+			return POST_request( api.Login, userCredential );
 		},
-		initializeUserProfile: function () {
-			return $http({
-			    method: 'GET',
-			    url: apiURL + '/' + API.GetUserProfile,
-			    ignoreExpiration: true
-			});
-		}
-		getUserProfile: function () {
-			return $http.get( apiURL + '/' + API.GetUserProfile );
-		},
-		getSingleUserProfile: function (prop, value) {
-			var url = [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/');
-			return $http.get(url);
-		},
-		updateUserProfile: function (query) {
-			return $http.post( apiURL + '/' + API.UpdateUserProfile, query );
+		updateUserProfile: function (profile) {
+			return POST_request( api.UpdateUserProfile, profile );
 		},
 		updateSingleUserProfile: function (query, prop, value) {
-			var url = [ apiURL , API.GetSingleUserProfile , prop , value ].join.('/');
-			return $http.post( url , query );
+			var url = [ api.GetSingleUserProfile , prop , value ].join('/');
+			return POST_request( url , query );
+		},
+		initializeUserProfile: function () {
+			return GET_request( api.GetUserProfile ); 
+		},
+		getUserProfile: function () {
+			return GET_request( api.GetUserProfile );
+		},
+		getSingleUserProfile: function (prop, value) {
+			var url = [ api.GetSingleUserProfile , prop , value ].join('/');
+			return GET_request( url );
 		}
 	};
 }]);

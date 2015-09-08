@@ -9,6 +9,7 @@ angular
     "ngRoute",
     "ngFacebook", 
     "ngCookies",
+    /*"ngMockE2E", *//* Development Usage */
     "angularAwesomeSlider"] )
 .config(['$routeProvider','$locationProvider','$httpProvider', '$facebookProvider', function ($routeProvider, $locationProvider, $httpProvider, $facebookProvider) {
 
@@ -27,17 +28,13 @@ angular
 
     $httpProvider.interceptors.push(['$q', '$location', 'Session', function ($q, $location, Session) {
         return {
-            'request': function (config) {
-                /*
-                    Attach JWT Token to every outgoing request
-                */
-                config.headers = config.headers || {};
-                if (Session.token) {
-                    config.headers.Authorization = 'Bearer ' + Session.token;
-                }
+            request: function (config) {
+                console.log("Sending request to " + config.url);
                 return config;
             },
             'responseError': function (rejection) {
+
+                console.log("Running into error! ", rejection);
                 /* 
                     The user is accessing restricted API or his API has expired 
                 */
@@ -66,6 +63,30 @@ angular
         $timeout(function() {
             componentHandler.upgradeDom();
         },100);
+    });
+/*
+*
+*  Restrict routing access to certain pages.
+*
+*/ 
+
+    var getLastUrlSegment = function (fullURL) {
+        var urlFragments = fullURL.split('/');
+        return urlFragments[ urlFragments.length - 1 ];
+    };
+
+    $rootScope.$on('$locationChangeStart', function (event, nextURL, previousURL) {
+        if( User.hasLoggedIn() ){
+            
+            if( RestrictedRoute.indexOf(getLastUrlSegment(nextURL)) != -1 ){
+
+                /* Save user's location to take him back to the same page after he has logged in */
+                $rootScope.savedLocation = '/' + getLastUrlSegment(previousURL);
+
+                $location.path('/login');
+
+            }
+        }
     });
 
 /*
@@ -101,23 +122,29 @@ angular
         
 .controller( "mainController", [ '$scope', 'User', function( $scope, User ){
 
+    var setCurrentUser = function (user) {
+        $scope.currentUser = user;
+        $scope.currentUser.identity = User.getIdentity();
+    };
+
     $scope.navBar = User.getNavBarLayout();
 
     $scope.currentUser = {
-        identity: User.getIdentity();
+        identity: User.getIdentity()
     };
 
-    User.initializeProfile().then( function () {
-        // Update User Identity
-        $scope.currentUser.identity = User.getIdentity();
-    });
+    // User.initializeProfile().then( function (profile) {
+    //     // Update User Data
+    //     // Name, FB_ID, Identity
+    //     setCurrentUser(profile);
+    //     console.log("Initialize User Profile___Success!");
+    // }, function (error) {
+    //     console.log("Initialize User Profile___Failed!",error);
+    // });
 
     $scope.enquiryHistory = [];
 
-    $scope.setCurrentUser = function (user) {
-        $scope.currentUser = user;
-        $scope.currentUser = User.getIdentity();
-    };
+    $scope.setCurrentUser = setCurrentUser;
 
 }]);
 

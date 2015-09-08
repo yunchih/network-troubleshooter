@@ -1,24 +1,25 @@
 angular
 .module( "networkTroubleshooter")
-.factory('User', ['$facebook', 'UserIdentity', 'Request', function( $facebook, UserIdentity, Request ){
+.factory('User', ['$facebook','$q', 'UserIdentity', 'Request', function( $facebook, $q, UserIdentity, Request ){
     
-    var identity = User.NotLoggedIn;
+    var identity = UserIdentity.NotLoggedIn;
     var profilePromise = undefined;
     var profile = {};
     return {
     	hasLoggedIn: function () {
-            return identity == User.LoggedIn;
+            return identity != UserIdentity.NotLoggedIn;
         },
         hasRegistered: function () {
-            return identity == User.LoggedInNotRegistered;
+            return identity == UserIdentity.LoggedInNotRegistered;
         },
-        loginBackend: function () {
-            Request.login().then(function (response) {
-                if( !response.registered ){
-                    identity = User.LoggedInNotRegistered;
+        loginBackend: function (userFacebookCredential) {
+            return Request.login(userFacebookCredential).then(function (response) {
+                console.log("Login Backend response: ",response);
+                if( !response.data.registered ){
+                    identity = UserIdentity.LoggedInNotRegistered;
                 }
                 else{
-                    identity = User.LoggedIn;
+                    identity = UserIdentity.LoggedIn;
                 }
             });
         },
@@ -27,6 +28,9 @@ angular
         },
         setProfile: function (_profile) {
             profile = _profile;
+            Request.updateUserProfile().then(function () {
+               console.log("Successfully update user profile"); 
+            });
         },
         getIdentity: function () {
         	return identity;
@@ -36,9 +40,13 @@ angular
         },
         initializeProfile: function() {
             if(!profilePromise || !authenticated) {
+                var _user = this.getUser;
                 profilePromise = Request.initializeUserProfile().then(
                 function(response) {
+                    console.log("Successfully retrieving profile from backend",response);
                     profile = response.data;
+                    identity = UserIdentity.LoggedIn;
+                    // Send user's profile to Main controller
                     return profile;
                 },function(rejection) {  // error
                     console.log("Fail retrieving profile from backend");
@@ -50,24 +58,20 @@ angular
         getNavBarLayout: function () {
             var navbarLayout = {};
 
-            navbarLayout[User.NotLoggedIn] = [
+            navbarLayout[UserIdentity.NotLoggedIn] = [
                 { 
                     title: '登入',
                     url: 'login'
                 }
             ];
-            navbarLayout[User.LoggedIn] = [
-                { 
-                    title: '個人資料',
-                    url: 'profile'
-                },
+            navbarLayout[UserIdentity.LoggedIn] = [
                 { 
                     title: '登出',
                     url: 'logout'
                 }
             ];
 
-            navbarLayout[User.LoggedInNotRegistered] = navbarLayout[User.LoggedIn];
+            navbarLayout[UserIdentity.LoggedInNotRegistered] = navbarLayout[UserIdentity.LoggedIn];
 
             return navbarLayout;
         }

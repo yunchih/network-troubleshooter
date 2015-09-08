@@ -61,11 +61,15 @@ module.exports = function(grunt) {
                   'bower_components/angular-cookies/angular-cookies.min.js',
                   'bower_components/angular-awesome-slider/dist/angular-awesome-slider.min.js',
                   'bower_components/ng-facebook/ngFacebook.js',
+
                   /* Custom js files */
                   'js/app.js',
                   'js/constants.js',
                   'js/providers/*.js',
                   'js/controllers/*.js',
+
+                  'js/mockBackend.js',
+
                   /* Google MDL */
                   'bower_components/material-design-lite/material.min.js'
                   ],
