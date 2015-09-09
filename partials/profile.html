@@ -9,6 +9,10 @@
 	#profile .mdl-card__title  {
 		box-shadow: none;
 	}
+
+	.field {
+		margin-bottom: 25px;
+	}
 	.field-name , .field-input {
 		display: inline-block;
 		vertical-align: baseline;
@@ -26,6 +30,11 @@
 	}
 	.field-name.input-has-error {
 		color: red;
+	}
+
+	.mdl-textfield {
+		padding: 0;
+		/*margin-bottom: 20px;*/
 	}
 	.input-has-error.mdl-textfield__input {
 		border-bottom: 2px solid red !important;
@@ -78,7 +87,7 @@
 						type="text" 
 						name="field" 
 						ng-model="profile[ fieldKey ]" 
-						ng-pattern="patterns[ fieldName ]"
+						ng-pattern="profilePatterns[ fieldName ]"
 						ng-class="{ 'input-has-error' : profileField.field.$invalid }"
 						required/>
 					</div>

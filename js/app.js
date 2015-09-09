@@ -34,15 +34,12 @@ angular
             },
             'responseError': function (rejection) {
 
-                console.log("Running into error! ", rejection);
                 /* 
                     The user is accessing restricted API or his API has expired 
                 */
                 if (rejection.status === 401 || rejection.status === 403) {
-                    if( !rejection.config.ignoreExpiration ){
-                        Session.destroy();
-                        $location.path('/signin');
-                    }
+                    Session.destroy();
+                    $location.path('/login');
                 }
                 return $q.reject(rejection);
             }
@@ -76,10 +73,11 @@ angular
     };
 
     $rootScope.$on('$locationChangeStart', function (event, nextURL, previousURL) {
-        if( User.hasLoggedIn() ){
+        if( User.canAccessRestrictedRoute() ){
             
             if( RestrictedRoute.indexOf(getLastUrlSegment(nextURL)) != -1 ){
 
+                console.log("You're accessing a restricted page: " + nextURL );
                 /* Save user's location to take him back to the same page after he has logged in */
                 $rootScope.savedLocation = '/' + getLastUrlSegment(previousURL);
 

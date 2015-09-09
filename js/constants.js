@@ -68,7 +68,7 @@ angular
 
 .constant("Identity",{
     status: {
-        NotRegistered: 'unregistered'
+        NotRegistered: 'unregistered',
         Registered: 'registered'
     },
     authorizedBy: {

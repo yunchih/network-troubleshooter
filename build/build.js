@@ -679,15 +679,12 @@ angular
             },
             'responseError': function (rejection) {
 
-                console.log("Running into error! ", rejection);
                 /* 
                     The user is accessing restricted API or his API has expired 
                 */
                 if (rejection.status === 401 || rejection.status === 403) {
-                    if( !rejection.config.ignoreExpiration ){
-                        Session.destroy();
-                        $location.path('/signin');
-                    }
+                    Session.destroy();
+                    $location.path('/login');
                 }
                 return $q.reject(rejection);
             }
@@ -721,10 +718,11 @@ angular
     };
 
     $rootScope.$on('$locationChangeStart', function (event, nextURL, previousURL) {
-        if( User.hasLoggedIn() ){
+        if( User.canAccessRestrictedRoute() ){
             
             if( RestrictedRoute.indexOf(getLastUrlSegment(nextURL)) != -1 ){
 
+                console.log("You're accessing a restricted page: " + nextURL );
                 /* Save user's location to take him back to the same page after he has logged in */
                 $rootScope.savedLocation = '/' + getLastUrlSegment(previousURL);
 
@@ -858,7 +856,7 @@ angular
 
 .constant("Identity",{
     status: {
-        NotRegistered: 'unregistered'
+        NotRegistered: 'unregistered',
         Registered: 'registered'
     },
     authorizedBy: {
@@ -956,16 +954,16 @@ angular
     this.profilePromise = undefined;
     this.profile = {};
 
-    this.getFacebookProfile: function () {
-        return $facebook.api("/me").success(function (res) {
+    this.getFacebookProfile = function () {
+        return $facebook.api("/me").then(function (res) {
             authorizedBy = Identity.authorizedBy.FB;
             return { 
-                name: response.name,
-                fb_id: response.id 
-            }); 
+                name: res.name,
+                fb_id: res.id 
+            }; 
         });
-    },
-    this.loginBackend: function (userFacebookCredential) {
+    };
+    this.loginBackend = function (userFacebookCredential) {
         return Request.login(userFacebookCredential).success(function (response) {
             if( !response.data.registered ){
                 identity = Identity.status.Registered;
@@ -974,14 +972,31 @@ angular
                 identity = Identity.status.NotRegistered;
             }
         });
-    },
-
-    this.setProfile: function (_profile) {
+    };
+    this.getProfile = function () {
+        if( this.profile ){
+            return Request.getUserProfile().success(function (res) {
+                this.profile = res.data;
+                return this.profile;
+            });
+        }
+        else {
+            return this.profile;
+        }
+    };
+    this.setProfile = function (_profile) {
         profile = _profile;
         return Request.updateUserProfile().then(function () {
            console.log("Successfully update user profile"); 
         });
-    },
+    };
+
+    this.getIdentity = function () {
+        return this.authorizedBy;
+    }
+    this.canAccessRestrictedRoute = function () {
+        return this.authorizedBy != Identity.authorizedBy.None;
+    }
 
 /*
  *
@@ -991,20 +1006,20 @@ angular
 
     var navbarLayout = {};
 
-    navbarLayout[UserIdentity.authorizedBy.None] = [
+    navbarLayout[Identity.authorizedBy.None] = [
         { 
             title: '登入',
             url: '/#/login'
         }
     ];
-    navbarLayout[UserIdentity.authorizedBy.FB] = [
+    navbarLayout[Identity.authorizedBy.FB] = [
         { 
             title: '登出',
             url: '/#/logout'
         }
     ];
 
-    navbarLayout[UserIdentity.authorizedBy.FB] = navbarLayout[UserIdentity.authorizedBy.Backend];
+    navbarLayout[Identity.authorizedBy.FB] = navbarLayout[Identity.authorizedBy.Backend];
 
     this.navbarLayout = navbarLayout;
 
@@ -1108,13 +1123,13 @@ angular
 		console.log("Facebook____Login");
 
 		$facebook.login()
-		.success(function(response) {
-			if (response.authResponse) {
+		.then(function(response) {
+				if (response.authResponse) {
 					var access_token = $facebook.getAuthResponse()['accessToken'];
 					return getUserFacebookInfo(access_token);
-			   } else {
-			    	return $q.reject('User cancelled login or did not fully authorize.');
-			   }
+				} else {
+					return $q.reject('User cancelled login or did not fully authorize.');
+				}
 			}
 		).error(function (error) {
 			console.log("Facebook____Login__Failed!! " , error);
@@ -1127,9 +1142,12 @@ angular
 .module( "networkTroubleshooter")
 .controller('profileController', ['$scope', '$routeParams', 'Profile','User', function( $scope, $routeParams, Profile, User ){
 
-	// Even if we got an empty object from 'User.getProfile()', 
-	// Angular will still propogate any new edit onto the object.
-	$scope.profile = User.getProfile();
+	$scope.profile = {};
+
+	User.getProfile().then(function (profile) {
+		$scope.profile = profile;
+	});
+
 	$scope.fieldMappings = Profile.mappings;
 	$scope.profilePatterns = Profile.patterns;
 

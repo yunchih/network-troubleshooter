@@ -7,16 +7,16 @@ angular
     this.profilePromise = undefined;
     this.profile = {};
 
-    this.getFacebookProfile: function () {
-        return $facebook.api("/me").success(function (res) {
+    this.getFacebookProfile = function () {
+        return $facebook.api("/me").then(function (res) {
             authorizedBy = Identity.authorizedBy.FB;
             return { 
-                name: response.name,
-                fb_id: response.id 
-            }); 
+                name: res.name,
+                fb_id: res.id 
+            }; 
         });
-    },
-    this.loginBackend: function (userFacebookCredential) {
+    };
+    this.loginBackend = function (userFacebookCredential) {
         return Request.login(userFacebookCredential).success(function (response) {
             if( !response.data.registered ){
                 identity = Identity.status.Registered;
@@ -25,14 +25,31 @@ angular
                 identity = Identity.status.NotRegistered;
             }
         });
-    },
-
-    this.setProfile: function (_profile) {
+    };
+    this.getProfile = function () {
+        if( this.profile ){
+            return Request.getUserProfile().success(function (res) {
+                this.profile = res.data;
+                return this.profile;
+            });
+        }
+        else {
+            return this.profile;
+        }
+    };
+    this.setProfile = function (_profile) {
         profile = _profile;
         return Request.updateUserProfile().then(function () {
            console.log("Successfully update user profile"); 
         });
-    },
+    };
+
+    this.getIdentity = function () {
+        return this.authorizedBy;
+    }
+    this.canAccessRestrictedRoute = function () {
+        return this.authorizedBy != Identity.authorizedBy.None;
+    }
 
 /*
  *
@@ -42,20 +59,20 @@ angular
 
     var navbarLayout = {};
 
-    navbarLayout[UserIdentity.authorizedBy.None] = [
+    navbarLayout[Identity.authorizedBy.None] = [
         { 
             title: '登入',
             url: '/#/login'
         }
     ];
-    navbarLayout[UserIdentity.authorizedBy.FB] = [
+    navbarLayout[Identity.authorizedBy.FB] = [
         { 
             title: '登出',
             url: '/#/logout'
         }
     ];
 
-    navbarLayout[UserIdentity.authorizedBy.FB] = navbarLayout[UserIdentity.authorizedBy.Backend];
+    navbarLayout[Identity.authorizedBy.FB] = navbarLayout[Identity.authorizedBy.Backend];
 
     this.navbarLayout = navbarLayout;
 

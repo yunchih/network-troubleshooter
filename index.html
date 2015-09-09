@@ -26,6 +26,8 @@
 
         <title>男一舍網路維修系統</title>
         <!-- <base href="/"> -->
+
+        <script src='https://www.google.com/recaptcha/api.js'></script>
     </head>
     <body 
         ng-app="networkTroubleshooter"  
@@ -36,7 +38,7 @@
             <div class="mdl-layout__drawer mdl-layout--small-screen-only">
                 
                 <nav class="mdl-navigation">
-                    <a href="/#/profile" ng-if="currentUser.name" id="username" class="mdl-navigation__link">
+                    <a href="/#/profile" ng-if="currentUser.name" id="navigation-username" class="mdl-navigation__link">
                         {{ currentUser.name }}
                     </a>
                     <a ng-repeat="nav in navBar[ currentUser.identity ]" class="mdl-navigation__link"  href="{{ nav.url }}">  
@@ -50,7 +52,7 @@
 
                     <div class="mdl-layout-spacer"></div>
                     <nav class="mdl-navigation mdl-layout--large-screen-only">
-                        <a href="profile" ng-if="currentUser.name" id="username" class="mdl-navigation__link">
+                        <a href="/#/profile" ng-if="currentUser.name" id="navigation-username" class="mdl-navigation__link">
                             {{ currentUser.name }}
                         </a>
                         <a ng-repeat="nav in navBar[ currentUser.identity ]" class="mdl-navigation__link"  href="{{ nav.url }}">  

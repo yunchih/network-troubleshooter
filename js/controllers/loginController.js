@@ -33,13 +33,13 @@ angular
 		console.log("Facebook____Login");
 
 		$facebook.login()
-		.success(function(response) {
-			if (response.authResponse) {
+		.then(function(response) {
+				if (response.authResponse) {
 					var access_token = $facebook.getAuthResponse()['accessToken'];
 					return getUserFacebookInfo(access_token);
-			   } else {
-			    	return $q.reject('User cancelled login or did not fully authorize.');
-			   }
+				} else {
+					return $q.reject('User cancelled login or did not fully authorize.');
+				}
 			}
 		).error(function (error) {
 			console.log("Facebook____Login__Failed!! " , error);
