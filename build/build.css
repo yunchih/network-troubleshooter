@@ -536,15 +536,6 @@ h1.accent {
     margin-right: 20px;
 }
 
-#username {
-    font-size: 23px;
-    font-weight: bold;
-    border-bottom: 5px solid transparent;
-    height: 55px;
-    margin-right: 24px;
-    line-height: 50px;
-}
-
 main {
     width: 100%;
 }
@@ -653,6 +644,15 @@ html, body {
     position: relative;
 }
 
+#username {
+	font-size: 23px;
+  	color: #EAE712;
+  	transition: color .3s ease;
+}
+#username:hover {
+    border-color: transparent;
+    color: #FFFB00;
+}
 .mdl-layout__header-row .mdl-navigation {
 	padding-top: 5px;
 }

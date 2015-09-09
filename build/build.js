@@ -765,27 +765,20 @@ angular
     
 })
         
-.controller( "mainController", [ '$scope', 'User', function( $scope, User ){
+.controller( "mainController", [ '$scope', '$facebook', 'User', function( $scope, $facebook, User ){
 
     var setCurrentUser = function (user) {
         $scope.currentUser = user;
         $scope.currentUser.identity = User.getIdentity();
     };
 
-    $scope.navBar = User.getNavBarLayout();
+    $scope.navBar = User.navbarLayout;
 
-    $scope.currentUser = {
-        identity: User.getIdentity()
-    };
-
-    // User.initializeProfile().then( function (profile) {
-    //     // Update User Data
-    //     // Name, FB_ID, Identity
-    //     setCurrentUser(profile);
-    //     console.log("Initialize User Profile___Success!");
-    // }, function (error) {
-    //     console.log("Initialize User Profile___Failed!",error);
-    // });
+    User.getFacebookProfile().then(function (FBidentity) {
+        setCurrentUser(FBidentity);
+    }, function () {
+        setCurrentUser({});
+    });
 
     $scope.enquiryHistory = [];
 
@@ -863,10 +856,16 @@ angular
     numOfSchedule: 3
 })
 
-.constant("UserIdentity",{
-    NotLoggedIn: 'x',
-    LoggedIn: 'o',
-    LoggedInNotRegistered: 'r'
+.constant("Identity",{
+    status: {
+        NotRegistered: 'unregistered'
+        Registered: 'registered'
+    },
+    authorizedBy: {
+        None: 'none',
+        FB: 'fb',
+        Backend: 'back'
+    }
 })
 
 .constant('AUTH_EVENTS', {
@@ -950,82 +949,64 @@ angular
 });
 angular
 .module( "networkTroubleshooter")
-.factory('User', ['$facebook','$q', 'UserIdentity', 'Request', function( $facebook, $q, UserIdentity, Request ){
+.service('User', ['$facebook','$q', 'Identity', 'Request', function( $facebook, $q, Identity, Request ){
     
-    var identity = UserIdentity.NotLoggedIn;
-    var profilePromise = undefined;
-    var profile = {};
-    return {
-    	hasLoggedIn: function () {
-            return identity != UserIdentity.NotLoggedIn;
-        },
-        hasRegistered: function () {
-            return identity == UserIdentity.LoggedInNotRegistered;
-        },
-        loginBackend: function (userFacebookCredential) {
-            return Request.login(userFacebookCredential).then(function (response) {
-                console.log("Login Backend response: ",response);
-                if( !response.data.registered ){
-                    identity = UserIdentity.LoggedInNotRegistered;
-                }
-                else{
-                    identity = UserIdentity.LoggedIn;
-                }
-            });
-        },
-        setIdentity: function (_identity) {
-            identity = _identity;
-        },
-        setProfile: function (_profile) {
-            profile = _profile;
-            Request.updateUserProfile().then(function () {
-               console.log("Successfully update user profile"); 
-            });
-        },
-        getIdentity: function () {
-        	return identity;
-        },
-        getProfile: function () {
-            return profile;
-        },
-        initializeProfile: function() {
-            if(!profilePromise || !authenticated) {
-                var _user = this.getUser;
-                profilePromise = Request.initializeUserProfile().then(
-                function(response) {
-                    console.log("Successfully retrieving profile from backend",response);
-                    profile = response.data;
-                    identity = UserIdentity.LoggedIn;
-                    // Send user's profile to Main controller
-                    return profile;
-                },function(rejection) {  // error
-                    console.log("Fail retrieving profile from backend");
-                    return $q.reject(rejection);
-                });
+    this.authorizedBy = Identity.authorizedBy.None;
+    this.status = Identity.status.NotRegistered;
+    this.profilePromise = undefined;
+    this.profile = {};
+
+    this.getFacebookProfile: function () {
+        return $facebook.api("/me").success(function (res) {
+            authorizedBy = Identity.authorizedBy.FB;
+            return { 
+                name: response.name,
+                fb_id: response.id 
+            }); 
+        });
+    },
+    this.loginBackend: function (userFacebookCredential) {
+        return Request.login(userFacebookCredential).success(function (response) {
+            if( !response.data.registered ){
+                identity = Identity.status.Registered;
             }
-            return profilePromise;
-        },
-        getNavBarLayout: function () {
-            var navbarLayout = {};
+            else{
+                identity = Identity.status.NotRegistered;
+            }
+        });
+    },
 
-            navbarLayout[UserIdentity.NotLoggedIn] = [
-                { 
-                    title: '登入',
-                    url: '/#/login'
-                }
-            ];
-            navbarLayout[UserIdentity.LoggedIn] = [
-                { 
-                    title: '登出',
-                    url: '/#/logout'
-                }
-            ];
+    this.setProfile: function (_profile) {
+        profile = _profile;
+        return Request.updateUserProfile().then(function () {
+           console.log("Successfully update user profile"); 
+        });
+    },
 
-            navbarLayout[UserIdentity.LoggedInNotRegistered] = navbarLayout[UserIdentity.LoggedIn];
+/*
+ *
+ *  Configuring Navigation bar layout
+ *
+ */
 
-            return navbarLayout;
+    var navbarLayout = {};
+
+    navbarLayout[UserIdentity.authorizedBy.None] = [
+        { 
+            title: '登入',
+            url: '/#/login'
         }
-    };
+    ];
+    navbarLayout[UserIdentity.authorizedBy.FB] = [
+        { 
+            title: '登出',
+            url: '/#/logout'
+        }
+    ];
+
+    navbarLayout[UserIdentity.authorizedBy.FB] = navbarLayout[UserIdentity.authorizedBy.Backend];
+
+    this.navbarLayout = navbarLayout;
 
 }]);
 
@@ -1094,66 +1075,51 @@ angular
 });
 angular
 .module( "networkTroubleshooter")
-.controller( "loginController", function( $scope, $rootScope , $facebook , $location , User ){
+.controller( "loginController", function( $scope, $rootScope , $facebook , $q , $location , User ){
 
 	function getUserFacebookInfo (fb_access_token) {
-		$facebook.api("/me").then( 
-			function(response) {
-				// Set User's FB Data
-				// which contains { name: 'xxx', id: 'xxx' }
-				$scope.setCurrentUser({ 
-					name: response.name,
-					fb_id: response.id 
-				});
+		return User.getFacebookProfile().success(function (FBidentity) {
 
-				var userFacebookCredential = {
-					access_token: fb_access_token, 
-					fb_id: response.id 
-				};
+	        $scope.setCurrentUser(FBidentity);
 
-				User.loginBackend(userFacebookCredential).then(
-					function (response) {
-						
-						Session.store( response.data.access_token );
+	        var userFacebookCredential = {
+				access_token: fb_access_token, 
+				fb_id: FBidentity.fb_id 
+			};
 
-						if( !response.data.registered ){
-							$location.path('/profile');
-						}
-						else {
-							// Take the user back to where he used to be.
-							$location.path( $rootScope.savedLocation );
-						}
-					},
-					function (rejection) {
-						console.log("Invalid Facebook Credential!  Rejection message: ", rejection);
-					}
-				);
-				
-			},
-			function(err) {
-				// Fail to retrieve user data from FB
-				$location.path('/');
-			}
-		);
+			return User.loginBackend(userFacebookCredential).success(function (response) {
+					
+				Session.store( response.data.access_token );
+
+				if( !response.data.registered ){
+					$location.path('/profile');
+				}
+				else {
+					// Take the user back to where he used to be.
+					$location.path( $rootScope.savedLocation );
+				}
+			});
+
+	    });
 	}
 		
 	$scope.FBLogin = function () {
 
 		console.log("Facebook____Login");
 
-		$facebook.login().then(
-			function(response) {
-			   if (response.authResponse) {
+		$facebook.login()
+		.success(function(response) {
+			if (response.authResponse) {
 					var access_token = $facebook.getAuthResponse()['accessToken'];
-					getUserFacebookInfo(access_token);
+					return getUserFacebookInfo(access_token);
 			   } else {
-			    	console.log('User cancelled login or did not fully authorize.');
+			    	return $q.reject('User cancelled login or did not fully authorize.');
 			   }
-			}, 
-			function (rejection) {
-				console.log("Facebook login failed: ", rejection);
 			}
-		);
+		).error(function (error) {
+			console.log("Facebook____Login__Failed!! " , error);
+			$location.path('/');
+		});
 	};
 });
 

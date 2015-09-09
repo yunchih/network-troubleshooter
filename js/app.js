@@ -120,27 +120,20 @@ angular
     
 })
         
-.controller( "mainController", [ '$scope', 'User', function( $scope, User ){
+.controller( "mainController", [ '$scope', '$facebook', 'User', function( $scope, $facebook, User ){
 
     var setCurrentUser = function (user) {
         $scope.currentUser = user;
         $scope.currentUser.identity = User.getIdentity();
     };
 
-    $scope.navBar = User.getNavBarLayout();
+    $scope.navBar = User.navbarLayout;
 
-    $scope.currentUser = {
-        identity: User.getIdentity()
-    };
-
-    // User.initializeProfile().then( function (profile) {
-    //     // Update User Data
-    //     // Name, FB_ID, Identity
-    //     setCurrentUser(profile);
-    //     console.log("Initialize User Profile___Success!");
-    // }, function (error) {
-    //     console.log("Initialize User Profile___Failed!",error);
-    // });
+    User.getFacebookProfile().then(function (FBidentity) {
+        setCurrentUser(FBidentity);
+    }, function () {
+        setCurrentUser({});
+    });
 
     $scope.enquiryHistory = [];
 

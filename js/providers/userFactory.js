@@ -1,80 +1,62 @@
 angular
 .module( "networkTroubleshooter")
-.factory('User', ['$facebook','$q', 'UserIdentity', 'Request', function( $facebook, $q, UserIdentity, Request ){
+.service('User', ['$facebook','$q', 'Identity', 'Request', function( $facebook, $q, Identity, Request ){
     
-    var identity = UserIdentity.NotLoggedIn;
-    var profilePromise = undefined;
-    var profile = {};
-    return {
-    	hasLoggedIn: function () {
-            return identity != UserIdentity.NotLoggedIn;
-        },
-        hasRegistered: function () {
-            return identity == UserIdentity.LoggedInNotRegistered;
-        },
-        loginBackend: function (userFacebookCredential) {
-            return Request.login(userFacebookCredential).then(function (response) {
-                console.log("Login Backend response: ",response);
-                if( !response.data.registered ){
-                    identity = UserIdentity.LoggedInNotRegistered;
-                }
-                else{
-                    identity = UserIdentity.LoggedIn;
-                }
-            });
-        },
-        setIdentity: function (_identity) {
-            identity = _identity;
-        },
-        setProfile: function (_profile) {
-            profile = _profile;
-            Request.updateUserProfile().then(function () {
-               console.log("Successfully update user profile"); 
-            });
-        },
-        getIdentity: function () {
-        	return identity;
-        },
-        getProfile: function () {
-            return profile;
-        },
-        initializeProfile: function() {
-            if(!profilePromise || !authenticated) {
-                var _user = this.getUser;
-                profilePromise = Request.initializeUserProfile().then(
-                function(response) {
-                    console.log("Successfully retrieving profile from backend",response);
-                    profile = response.data;
-                    identity = UserIdentity.LoggedIn;
-                    // Send user's profile to Main controller
-                    return profile;
-                },function(rejection) {  // error
-                    console.log("Fail retrieving profile from backend");
-                    return $q.reject(rejection);
-                });
+    this.authorizedBy = Identity.authorizedBy.None;
+    this.status = Identity.status.NotRegistered;
+    this.profilePromise = undefined;
+    this.profile = {};
+
+    this.getFacebookProfile: function () {
+        return $facebook.api("/me").success(function (res) {
+            authorizedBy = Identity.authorizedBy.FB;
+            return { 
+                name: response.name,
+                fb_id: response.id 
+            }); 
+        });
+    },
+    this.loginBackend: function (userFacebookCredential) {
+        return Request.login(userFacebookCredential).success(function (response) {
+            if( !response.data.registered ){
+                identity = Identity.status.Registered;
             }
-            return profilePromise;
-        },
-        getNavBarLayout: function () {
-            var navbarLayout = {};
+            else{
+                identity = Identity.status.NotRegistered;
+            }
+        });
+    },
 
-            navbarLayout[UserIdentity.NotLoggedIn] = [
-                { 
-                    title: '登入',
-                    url: '/#/login'
-                }
-            ];
-            navbarLayout[UserIdentity.LoggedIn] = [
-                { 
-                    title: '登出',
-                    url: '/#/logout'
-                }
-            ];
+    this.setProfile: function (_profile) {
+        profile = _profile;
+        return Request.updateUserProfile().then(function () {
+           console.log("Successfully update user profile"); 
+        });
+    },
 
-            navbarLayout[UserIdentity.LoggedInNotRegistered] = navbarLayout[UserIdentity.LoggedIn];
+/*
+ *
+ *  Configuring Navigation bar layout
+ *
+ */
 
-            return navbarLayout;
+    var navbarLayout = {};
+
+    navbarLayout[UserIdentity.authorizedBy.None] = [
+        { 
+            title: '登入',
+            url: '/#/login'
         }
-    };
+    ];
+    navbarLayout[UserIdentity.authorizedBy.FB] = [
+        { 
+            title: '登出',
+            url: '/#/logout'
+        }
+    ];
+
+    navbarLayout[UserIdentity.authorizedBy.FB] = navbarLayout[UserIdentity.authorizedBy.Backend];
+
+    this.navbarLayout = navbarLayout;
 
 }]);

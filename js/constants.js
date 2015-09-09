@@ -66,10 +66,16 @@ angular
     numOfSchedule: 3
 })
 
-.constant("UserIdentity",{
-    NotLoggedIn: 'x',
-    LoggedIn: 'o',
-    LoggedInNotRegistered: 'r'
+.constant("Identity",{
+    status: {
+        NotRegistered: 'unregistered'
+        Registered: 'registered'
+    },
+    authorizedBy: {
+        None: 'none',
+        FB: 'fb',
+        Backend: 'back'
+    }
 })
 
 .constant('AUTH_EVENTS', {
