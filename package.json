@@ -2,10 +2,8 @@
   "name": "troubleshooter",
   "version": "0.0.0",
   "description": "a troubleshooter for M1 network",
-  "main": "app/app.js",
-  "scripts": {
-    "start": "NODE_PATH=./app:./public NODE_ENV=development nodemon --debug  app/app.js "
-  },
+  "main": "app.js",
+  "scripts": {},
   "repository": {
     "type": "git",
     "url": "git://github.com/yunchih/network-troubleshooter.git"
@@ -19,12 +17,14 @@
   "bugs": {
     "url": "https://github.com/yunchih/network-troubleshooter/issues"
   },
-  "dependencies": {
-    "express": "~4.13.3",
-    "path": "~0.11.14"
-  },
   "devDependencies": {
     "grunt-preload-assets": "~0.2.1",
-    "execSync": "~1.0.2"
+    "execSync": "~1.0.2",
+    "grunt-appcache": "~0.1.8",
+    "grunt-contrib-manifest": "~0.2.0",
+    "grunt-manifest": "~0.4.4",
+    "grunt-contrib-concat": "~0.5.1",
+    "grunt-contrib-cssmin": "~0.13.0",
+    "grunt-contrib-uglify": "~0.9.2"
   }
 }
