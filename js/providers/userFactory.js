@@ -61,13 +61,13 @@ angular
             navbarLayout[UserIdentity.NotLoggedIn] = [
                 { 
                     title: '登入',
-                    url: 'login'
+                    url: '/#/login'
                 }
             ];
             navbarLayout[UserIdentity.LoggedIn] = [
                 { 
                     title: '登出',
-                    url: 'logout'
+                    url: '/#/logout'
                 }
             ];
 
