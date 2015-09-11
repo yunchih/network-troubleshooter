@@ -2,6 +2,9 @@ angular
 .module( "networkTroubleshooter")
 .service('User', ['$facebook','$q', 'Identity', 'Request', function( $facebook, $q, Identity, Request ){
     
+    
+
+    
     this.authorizedBy = Identity.authorizedBy.None;
     this.status = Identity.status.NotRegistered;
     this.profilePromise = undefined;
@@ -36,6 +39,24 @@ angular
         else {
             return this.profile;
         }
+    };
+    this.checkProfileUpdated = function(_profile) {
+        var newProfileFields = Object.getOwnPropertyNames(this.profile);
+        var oldProfileFields = Object.getOwnPropertyNames(_profile);
+
+        if (newProfileFields.length != oldProfileFields.length) {
+            return true;
+        }
+
+        for (var i = 0; i < newProfileFields.length; i++) {
+            var field = newProfileFields[i];
+
+            if (this.profile[field] !== _profile[field]) {
+                return true;
+            }
+        }
+
+        return false;
     };
     this.setProfile = function (_profile) {
         profile = _profile;

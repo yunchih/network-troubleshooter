@@ -23,7 +23,7 @@ angular
 
 	var POST_request = function (url_body, data) {
 		return $http({
-		    method: 'GET',
+		    method: 'POST',
 		    url: apiBase + '/' + url_body,
 		    headers: getAccessToken(),
 		    data: data
@@ -38,7 +38,7 @@ angular
 			return POST_request( api.UpdateUserProfile, profile );
 		},
 		updateSingleUserProfile: function (query, prop, value) {
-			var url = [ api.GetSingleUserProfile , prop , value ].join('/');
+			var url = [ api.UpdateSingleUserProfile , prop , value ].join('/');
 			return POST_request( url , query );
 		},
 		initializeUserProfile: function () {

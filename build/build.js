@@ -838,9 +838,11 @@ angular
     '學號': /^\w\d{8}$/i
   },
   mappings: {
+    /*
     name: '真實姓名',
     room_number: '房號',
     student_id: '學號',
+    */
     phone_number: '電話'
   }
   	
@@ -899,7 +901,7 @@ angular
 
 	var POST_request = function (url_body, data) {
 		return $http({
-		    method: 'GET',
+		    method: 'POST',
 		    url: apiBase + '/' + url_body,
 		    headers: getAccessToken(),
 		    data: data
@@ -914,7 +916,7 @@ angular
 			return POST_request( api.UpdateUserProfile, profile );
 		},
 		updateSingleUserProfile: function (query, prop, value) {
-			var url = [ api.GetSingleUserProfile , prop , value ].join('/');
+			var url = [ api.UpdateSingleUserProfile , prop , value ].join('/');
 			return POST_request( url , query );
 		},
 		initializeUserProfile: function () {
@@ -948,6 +950,9 @@ angular
 angular
 .module( "networkTroubleshooter")
 .service('User', ['$facebook','$q', 'Identity', 'Request', function( $facebook, $q, Identity, Request ){
+    
+    
+
     
     this.authorizedBy = Identity.authorizedBy.None;
     this.status = Identity.status.NotRegistered;
@@ -983,6 +988,24 @@ angular
         else {
             return this.profile;
         }
+    };
+    this.checkProfileUpdated = function(_profile) {
+        var newProfileFields = Object.getOwnPropertyNames(this.profile);
+        var oldProfileFields = Object.getOwnPropertyNames(_profile);
+
+        if (newProfileFields.length != oldProfileFields.length) {
+            return true;
+        }
+
+        for (var i = 0; i < newProfileFields.length; i++) {
+            var field = newProfileFields[i];
+
+            if (this.profile[field] !== _profile[field]) {
+                return true;
+            }
+        }
+
+        return false;
     };
     this.setProfile = function (_profile) {
         profile = _profile;
@@ -1151,8 +1174,21 @@ angular
 	$scope.fieldMappings = Profile.mappings;
 	$scope.profilePatterns = Profile.patterns;
 
-	$scope.updateProfile = function () {
-		User.setProfile($scope.profile);
+	$scope.submitted = false;
+
+	$scope.submissionStatus = '';
+
+	$scope.updateProfile = function (form) {
+		if( form.$valid && User.checkProfileUpdated($scope.profile) ){
+			$scope.submissionStatus = 'pending';
+			User.setProfile($scope.profile).then(function () {
+				$scope.submissionStatus = 'done';
+			});
+		}
+		else{
+			$scope.submitted = true;
+		}	
+
 	};
 }]);
 

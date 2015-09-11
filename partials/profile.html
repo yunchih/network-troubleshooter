@@ -58,6 +58,10 @@
 	#submit:hover {
 		background-color: rgba(158, 158, 158, 0.2);
 	}
+	#submit .mdl-spinner {
+		width: 25px;
+		height: 25px;
+	}
 	#form-error-message {
 		color: red;
 	}
@@ -72,14 +76,14 @@
 	<div class="mdl-card__title">
 		<h1 class="accent" id="username">{{ currentUser.name }}</h1>
 	</div>
-	<form name="profileForm" novalidate ng-submit="profileForm.$valid && updateProfile()" >
+	<form name="profileForm" novalidate ng-submit="updateProfile(profileForm)" >
 
 		<div id="form-body">
 			<div class="field" ng-repeat="(fieldKey, fieldName) in fieldMappings">
 				<ng-form name="profileField">
 					<span 
 						class="field-name"
-						ng-class="{ 'input-has-error' : profileField.field.$invalid }">
+						ng-class="{ 'input-has-error' : submitted && profileField.field.$invalid }">
 						{{ fieldName }}
 					</span>
 					<div class="field-input mdl-textfield mdl-js-textfield">
@@ -88,7 +92,7 @@
 						name="field" 
 						ng-model="profile[ fieldKey ]" 
 						ng-pattern="profilePatterns[ fieldName ]"
-						ng-class="{ 'input-has-error' : profileField.field.$invalid }"
+						ng-class="{ 'input-has-error' : submitted && profileField.field.$invalid }"
 						required/>
 					</div>
 				</ng-form>
@@ -96,9 +100,22 @@
 		</div>
 			
 		<div class="mdl-card-footer-button mdl-card__actions mdl-card--border"></div>
-		<input type="submit" value="更新資料" id="submit" >
+
+		
+		
+		<button type="submit" id="submit" >
+			<span>
+				更新資料
+			</span>
+			<span ng-switch on="submissionStatus">
+				<i ng-switch-when="done" style="font-size: 30px; color: green" class="material-icons">done</i>
+				<div ng-switch-when="pending" class="mdl-spinner mdl-js-spinner is-active" ></div>
+			</span>
+		</button>
+		
+		
 		<p class="animation-pop" id="form-error-message" 
-			ng-show="profileForm.$invalid" >
+			ng-show="submitted && profileForm.$invalid" >
 			請確認所有資料格式正確
 		</p>
 	</form>
