@@ -26,7 +26,7 @@ angular
 		    method: 'POST',
 		    url: apiBase + '/' + url_body,
 		    headers: getAccessToken(),
-		    data: data
+		    params: data
 		});
 	};
 
