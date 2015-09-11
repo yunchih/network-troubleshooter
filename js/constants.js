@@ -4,7 +4,7 @@ angular
 .constant("Testing",false)
 
 .constant("API", {
-    base: "http://140.112.196.15:3000/api",
+    base: "/api",
     version: "1.0",
     api: {
         Login: "auth/login",

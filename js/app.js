@@ -33,13 +33,13 @@ angular
                 return config;
             },
             'responseError': function (rejection) {
-
+                console.log("API CALL ERROR CATCHED: ",rejection);
                 /* 
                     The user is accessing restricted API or his API has expired 
                 */
                 if (rejection.status === 401 || rejection.status === 403) {
                     Session.destroy();
-                    $location.path('/login');
+                    // $location.path('/login');
                 }
                 return $q.reject(rejection);
             }
@@ -49,7 +49,19 @@ angular
 }])
 
 
-.run(function($rootScope, $location, $timeout, Request, Session, User) {
+.run(function($rootScope, $location, $timeout, RestrictedRoute, Request, Session, User) {
+
+/*
+*
+*  Global Variables
+*
+*/ 
+    $rootScope.setCurrentUser = function (user) {
+        $rootScope.currentUser = user;
+        $rootScope.navBar = User.getNavbarLayout();
+    };
+
+    $rootScope.enquiryHistory = [];
 
 /*
 *
@@ -68,8 +80,7 @@ angular
 */ 
 
     var getLastUrlSegment = function (fullURL) {
-        var urlFragments = fullURL.split('/');
-        return urlFragments[ urlFragments.length - 1 ];
+        return fullURL.split('#')[1];
     };
 
     $rootScope.$on('$locationChangeStart', function (event, nextURL, previousURL) {
@@ -79,7 +90,7 @@ angular
 
                 console.log("You're accessing a restricted page: " + nextURL );
                 /* Save user's location to take him back to the same page after he has logged in */
-                $rootScope.savedLocation = '/' + getLastUrlSegment(previousURL);
+                $rootScope.savedLocation = getLastUrlSegment(previousURL);
 
                 $location.path('/login');
 
@@ -118,24 +129,9 @@ angular
     
 })
         
-.controller( "mainController", [ '$scope', '$facebook', 'User', function( $scope, $facebook, User ){
+.controller( "mainController", [ '$scope', '$facebook', 'User', 'Session', function( $scope, $facebook, User, Session ){
 
-    var setCurrentUser = function (user) {
-        $scope.currentUser = user;
-        $scope.currentUser.identity = User.getIdentity();
-    };
-
-    $scope.navBar = User.navbarLayout;
-
-    User.getFacebookProfile().then(function (FBidentity) {
-        setCurrentUser(FBidentity);
-    }, function () {
-        setCurrentUser({});
-    });
-
-    $scope.enquiryHistory = [];
-
-    $scope.setCurrentUser = setCurrentUser;
+    User.login();
 
 }]);
 

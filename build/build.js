@@ -678,13 +678,13 @@ angular
                 return config;
             },
             'responseError': function (rejection) {
-
+                console.log("API CALL ERROR CATCHED: ",rejection);
                 /* 
                     The user is accessing restricted API or his API has expired 
                 */
                 if (rejection.status === 401 || rejection.status === 403) {
                     Session.destroy();
-                    $location.path('/login');
+                    // $location.path('/login');
                 }
                 return $q.reject(rejection);
             }
@@ -694,7 +694,19 @@ angular
 }])
 
 
-.run(function($rootScope, $location, $timeout, Request, Session, User) {
+.run(function($rootScope, $location, $timeout, RestrictedRoute, Request, Session, User) {
+
+/*
+*
+*  Global Variables
+*
+*/ 
+    $rootScope.setCurrentUser = function (user) {
+        $rootScope.currentUser = user;
+        $rootScope.navBar = User.getNavbarLayout();
+    };
+
+    $rootScope.enquiryHistory = [];
 
 /*
 *
@@ -713,8 +725,7 @@ angular
 */ 
 
     var getLastUrlSegment = function (fullURL) {
-        var urlFragments = fullURL.split('/');
-        return urlFragments[ urlFragments.length - 1 ];
+        return fullURL.split('#')[1];
     };
 
     $rootScope.$on('$locationChangeStart', function (event, nextURL, previousURL) {
@@ -724,7 +735,7 @@ angular
 
                 console.log("You're accessing a restricted page: " + nextURL );
                 /* Save user's location to take him back to the same page after he has logged in */
-                $rootScope.savedLocation = '/' + getLastUrlSegment(previousURL);
+                $rootScope.savedLocation = getLastUrlSegment(previousURL);
 
                 $location.path('/login');
 
@@ -763,24 +774,9 @@ angular
     
 })
         
-.controller( "mainController", [ '$scope', '$facebook', 'User', function( $scope, $facebook, User ){
+.controller( "mainController", [ '$scope', '$facebook', 'User', 'Session', function( $scope, $facebook, User, Session ){
 
-    var setCurrentUser = function (user) {
-        $scope.currentUser = user;
-        $scope.currentUser.identity = User.getIdentity();
-    };
-
-    $scope.navBar = User.navbarLayout;
-
-    User.getFacebookProfile().then(function (FBidentity) {
-        setCurrentUser(FBidentity);
-    }, function () {
-        setCurrentUser({});
-    });
-
-    $scope.enquiryHistory = [];
-
-    $scope.setCurrentUser = setCurrentUser;
+    User.login();
 
 }]);
 
@@ -792,7 +788,7 @@ angular
 .constant("Testing",false)
 
 .constant("API", {
-    base: "http://140.112.196.15:3000/api",
+    base: "/api",
     version: "1.0",
     api: {
         Login: "auth/login",
@@ -936,53 +932,106 @@ angular
 .service("Session", function ($cookieStore) {
 	
 	this.token = $cookieStore.get('token');
+	this.fb_token = $cookieStore.get('fb_token');
 
-	this.store = function (webToken) {
+	this.store = function (webToken, fbToken) {
 		this.token = webToken;
+		this.fb_token = fbToken;
 		$cookieStore.put('token',webToken);
+		$cookieStore.put('fb_token',fbToken);
 	};
 	this.destroy = function () {
-		this.token = null;
+		this.token = this.fb_token = null;
 		$cookieStore.remove('token');
+		$cookieStore.remove('fb_token');
 	};
 		
 });
 angular
 .module( "networkTroubleshooter")
-.service('User', ['$facebook','$q', 'Identity', 'Request', function( $facebook, $q, Identity, Request ){
+.service('User', 
+    [ '$rootScope', '$facebook','$q', 'Identity', 'Request', 'Session', 
+    function( $rootScope, $facebook, $q, Identity, Request, Session ){
     
-    
+    var authorizedBy;
+    var status = Identity.status.NotRegistered;
+    var profilePromise = undefined;
+    var profile = {};
 
-    
-    this.authorizedBy = Identity.authorizedBy.None;
-    this.status = Identity.status.NotRegistered;
-    this.profilePromise = undefined;
-    this.profile = {};
+    var loginBackend  = function(getFacebookProfilePromise, fb_access_token) {
+        return getFacebookProfilePromise.then( function (FBidentity) {
+            
+            var userFacebookCredential = {
+                access_token: fb_access_token, 
+                fb_id: FBidentity.fb_id 
+            };
 
-    this.getFacebookProfile = function () {
-        return $facebook.api("/me").then(function (res) {
-            authorizedBy = Identity.authorizedBy.FB;
-            return { 
-                name: res.name,
-                fb_id: res.id 
-            }; 
-        });
+            return Request.login(userFacebookCredential).then(
+                function (response) {
+
+                    Session.store( response.data.access_token, fb_access_token );
+
+                    if( !response.data.registered ){
+                        status = Identity.status.NotRegistered;
+                        $location.path('/#/profile');
+                    }
+                    else {
+                        status = Identity.status.Registered;
+                        // Take the user back to where he used to be.
+                        $location.path( $rootScope.savedLocation );
+                    }
+                }, 
+                function (rejection) {
+                    console.log("Login Backend Failed! ",rejection);
+                }
+            );
+
+            /* No handler function for failure (it's been checked in previous promise chain) */
+        }, null);
     };
-    this.loginBackend = function (userFacebookCredential) {
-        return Request.login(userFacebookCredential).success(function (response) {
-            if( !response.data.registered ){
-                identity = Identity.status.Registered;
+    var getFacebookProfile = function () {
+        return $facebook.api("/me").then(
+            function (res) {
+                authorizedBy = Identity.authorizedBy.FB;
+                return { 
+                    name: res.name,
+                    fb_id: res.id
+                }; 
+            }, 
+            function (res) {
+                authorizedBy = Identity.authorizedBy.None;
+                return {};
             }
-            else{
-                identity = Identity.status.NotRegistered;
-            }
-        });
+        );
     };
+    this.login = function (fb_access_token) {
+        var promise = getFacebookProfile().then(
+            function (FBidentity) {
+                $rootScope.setCurrentUser(FBidentity);
+                return FBidentity;
+            },
+            function () {
+                $rootScope.setCurrentUser({});
+            }
+        );
+
+        fb_access_token = fb_access_token || Session.fb_token;
+
+        return loginBackend( promise, fb_access_token );
+    };
+
+    this.logout = function () {
+        authorizedBy = Identity.authorizedBy.None;
+        status = Identity.status.NotRegistered;
+        profile = {};
+        $location.path('/#/');
+    };
+
     this.getProfile = function () {
         if( this.profile ){
-            return Request.getUserProfile().success(function (res) {
-                this.profile = res.data;
-                return this.profile;
+            return Request.getUserProfile().then(function (res) {
+                profile = res.data;
+                return profile;
             });
         }
         else {
@@ -1015,10 +1064,10 @@ angular
     };
 
     this.getIdentity = function () {
-        return this.authorizedBy;
+        return authorizedBy;
     }
     this.canAccessRestrictedRoute = function () {
-        return this.authorizedBy != Identity.authorizedBy.None;
+        return authorizedBy != Identity.authorizedBy.None;
     }
 
 /*
@@ -1042,9 +1091,11 @@ angular
         }
     ];
 
-    navbarLayout[Identity.authorizedBy.FB] = navbarLayout[Identity.authorizedBy.Backend];
+    navbarLayout[Identity.authorizedBy.BackendB] = navbarLayout[Identity.authorizedBy.F];
 
-    this.navbarLayout = navbarLayout;
+    this.getNavbarLayout = function () {
+        return navbarLayout[ authorizedBy ];
+    };
 
 }]);
 
@@ -1113,54 +1164,45 @@ angular
 });
 angular
 .module( "networkTroubleshooter")
-.controller( "loginController", function( $scope, $rootScope , $facebook , $q , $location , User ){
-
-	function getUserFacebookInfo (fb_access_token) {
-		return User.getFacebookProfile().success(function (FBidentity) {
-
-	        $scope.setCurrentUser(FBidentity);
-
-	        var userFacebookCredential = {
-				access_token: fb_access_token, 
-				fb_id: FBidentity.fb_id 
-			};
-
-			return User.loginBackend(userFacebookCredential).success(function (response) {
-					
-				Session.store( response.data.access_token );
-
-				if( !response.data.registered ){
-					$location.path('/profile');
-				}
-				else {
-					// Take the user back to where he used to be.
-					$location.path( $rootScope.savedLocation );
-				}
-			});
-
-	    });
-	}
-		
+.controller( "loginController", function( $scope, $facebook , $q , $location , User ){
+	
 	$scope.FBLogin = function () {
 
 		console.log("Facebook____Login");
 
 		$facebook.login()
-		.then(function(response) {
+		.then(
+			function(response) {
 				if (response.authResponse) {
 					var access_token = $facebook.getAuthResponse()['accessToken'];
-					return getUserFacebookInfo(access_token);
+					return User.login( access_token );
 				} else {
 					return $q.reject('User cancelled login or did not fully authorize.');
 				}
+			},
+			function (rejection) {
+				console.log('Facebook____Login__Failed! ', rejection);			
 			}
-		).error(function (error) {
-			console.log("Facebook____Login__Failed!! " , error);
+		).then(
+
+		null, /* If success, do nothing */
+
+		function (rejection) {
+			console.log("Facebook____Login__Failed!! " , rejection);
 			$location.path('/');
 		});
 	};
 });
 
+angular
+.module( "networkTroubleshooter")
+.controller( "logoutController", function( Session, User ){
+
+	Session.destroy();
+	User.logout();
+	$scope.setCurrentUser({});
+	
+});
 angular
 .module( "networkTroubleshooter")
 .controller('profileController', ['$scope', '$routeParams', 'Profile','User', function( $scope, $routeParams, Profile, User ){
