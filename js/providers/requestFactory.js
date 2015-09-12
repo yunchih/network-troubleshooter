@@ -5,28 +5,24 @@ angular
 	var apiBase = [ API.base , API.version ].join('/');
 	var api = API.api;
 	
-	var getAccessToken = function () {
-		var headers = {}
-        if (Session.token) {
-            headers.Authorization = 'Bearer ' + Session.token;
-        }
-        return headers;
+	var appendAccessToken = function (data) {
+		data.acces_token = Session.token;
+        return data;
 	};
 
 	var GET_request = function (url_body) {
 		return $http({
-		    method: 'GET',
-		    url: apiBase + '/' + url_body,
-		    headers: getAccessToken()
+			method: 'GET',
+			url: apiBase + '/' + url_body,
+			params: appendAccessToken({})
 		});
 	};
 
 	var POST_request = function (url_body, data) {
 		return $http({
-		    method: 'POST',
-		    url: apiBase + '/' + url_body,
-		    headers: getAccessToken(),
-		    params: data
+			method: 'POST',
+			url: apiBase + '/' + url_body,
+			params: appendAccessToken(data)
 		});
 	};
 

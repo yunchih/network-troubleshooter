@@ -10,8 +10,7 @@ angular
 		.then(
 			function(response) {
 				if (response.authResponse) {
-					var access_token = $facebook.getAuthResponse()['accessToken'];
-					return User.login( access_token );
+					return User.login( $scope );
 				} else {
 					return $q.reject('User cancelled login or did not fully authorize.');
 				}

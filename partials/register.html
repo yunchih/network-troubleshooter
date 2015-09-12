@@ -1,10 +1,12 @@
 <link rel="stylesheet" href="css/profile.css">
 
 <div class="mdl-card mdl-shadow--2dp" id="profile" ng-controller="profileController">
-	<div class="mdl-card__title">
-		<h1 class="accent" id="username">{{ currentUser.name }}</h1>
+	<div style="background-color: rgba(255, 216, 0, 0.6); " class="mdl-card__title">
+		<div class="mdl-card-container">
+			<h1 class="accent">註冊</h1>
+		</div>
 	</div>
-	<form name="profileForm" novalidate ng-submit="updateProfile(profileForm)" >
+	<form name="profileForm" id="register-form" novalidate ng-submit="updateProfile(profileForm)" >
 
 		<div id="form-body">
 			<div class="field" ng-repeat="(fieldKey, fieldName) in fieldMappings">
@@ -26,14 +28,19 @@
 				</ng-form>
 			</div>
 		</div>
-			
+		<div id="reCAPTCHA" 
+			vc-recaptcha 
+			key="'6LftjwwTAAAAAM8uKkShi-RbeZJhgEfamJCrRkJ4'" 
+			ng-class="{ 'warn': warnCAPTCHA }"
+			on-success="setCAPTCHA(response)"
+			on-expire="CAPTCHAexpired()"
+		></div>
 		<div class="mdl-card-footer-button mdl-card__actions mdl-card--border"></div>
 
 		
-		
-		<button type="submit" id="submit" >
+		<button type="submit" form="register-form" id="submit" >
 			<span>
-				更新資料
+				確定 
 			</span>
 			<span ng-switch on="submissionStatus">
 				<i ng-switch-when="done" style="font-size: 30px; color: green" class="material-icons">done</i>

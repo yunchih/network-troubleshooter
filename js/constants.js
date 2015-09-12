@@ -50,11 +50,11 @@ angular
     '學號': /^\w\d{8}$/i
   },
   mappings: {
-    /*
+    
     name: '真實姓名',
     room_number: '房號',
     student_id: '學號',
-    */
+    
     phone_number: '電話'
   }
   	

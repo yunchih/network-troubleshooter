@@ -24,7 +24,7 @@
     	display: block;
 	}
 </style>
-<div class="mdl-card mdl-shadow--2dp" id="service">
+<div class="mdl-card mdl-shadow--2dp" id="service" ng-controller='termOfServiceController'>
 	<div class="mdl-card__title">
 		<div class="mdl-card-container">
 			<h1>一些小約定</h1>
@@ -67,10 +67,10 @@
 	</div>
 	
 	<div class="mdl-card-footer-button mdl-card__actions mdl-card--border">
-		<a class="mdl-button mdl-button--colored  mdl-button--accent mdl-js-button mdl-js-ripple-effect" href="/">
+		<a class="mdl-button mdl-button--colored  mdl-button--accent mdl-js-button mdl-js-ripple-effect" href="/#/">
 		  不同意
 		</a>
-		<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" href="/#/troubleshooter">
+		<a class="mdl-button mdl-button--colored mdl-js-button mdl-js-ripple-effect" ng-click='agree' href="/#/register">
 		  同意
 		</a>
 	</div>

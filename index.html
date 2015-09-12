@@ -22,7 +22,9 @@
         <title>男一舍網路維修系統</title>
         <!-- <base href="/"> -->
 
-        <!-- <script src='https://www.google.com/recaptcha/api.js'></script> -->
+        <script
+            src="https://www.google.com/recaptcha/api.js?onload=vcRecaptchaApiLoaded&render=explicit"
+            async defer > </script>
     </head>
     <body 
         ng-app="networkTroubleshooter"  
@@ -34,9 +36,9 @@
                 
                 <nav class="mdl-navigation">
                     <a href="/#/profile" ng-if="currentUser.name" id="navigation-username" class="mdl-navigation__link">
-                        {{ currentUser.name }}
+                        {{ $root.currentUser.name }}
                     </a>
-                    <a ng-repeat="nav in navBar" class="mdl-navigation__link"  href="{{ nav.url }}">  
+                    <a ng-repeat="nav in $root.navBar" class="mdl-navigation__link"  href="{{ nav.url }}">  
                             {{ nav.title }}
                     </a>
                 </nav>

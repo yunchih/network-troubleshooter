@@ -1,14 +1,15 @@
 'use strict';
 
 
-var troubleshooterApp = 
+var troubleshooterApp =
 angular
 .module( "networkTroubleshooter", [
-    "ngSanitize", 
-    "ngAnimate", 
+    "ngSanitize",
+    "ngAnimate",
     "ngRoute",
-    "ngFacebook", 
+    "ngFacebook",
     "ngCookies",
+    "vcRecaptcha",
     /*"ngMockE2E", *//* Development Usage */
     "angularAwesomeSlider"] )
 .config(['$routeProvider','$locationProvider','$httpProvider', '$facebookProvider', function ($routeProvider, $locationProvider, $httpProvider, $facebookProvider) {
@@ -50,18 +51,6 @@ angular
 
 
 .run(function($rootScope, $location, $timeout, RestrictedRoute, Request, Session, User) {
-
-/*
-*
-*  Global Variables
-*
-*/ 
-    $rootScope.setCurrentUser = function (user) {
-        $rootScope.currentUser = user;
-        $rootScope.navBar = User.getNavbarLayout();
-    };
-
-    $rootScope.enquiryHistory = [];
 
 /*
 *
@@ -131,7 +120,11 @@ angular
         
 .controller( "mainController", [ '$scope', '$facebook', 'User', 'Session', function( $scope, $facebook, User, Session ){
 
-    User.login();
+    $scope.enquiryHistory = [];
+
+    User.login($scope).then(function () {
+        console.log("Current User: ", $scope.currentUser);
+    });
 
 }]);
 

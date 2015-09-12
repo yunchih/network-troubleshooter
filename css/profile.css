@@ -1,0 +1,83 @@
+	#profile {
+	    text-align: center;
+	}
+
+	#username {
+		margin: 0 auto;
+	}
+	#profile .mdl-card__title  {
+		box-shadow: none;
+	}
+
+	.field {
+		margin-bottom: 25px;
+	}
+	.field-name , .field-input {
+		display: inline-block;
+		vertical-align: baseline;
+	}
+
+	.field-input {
+		max-width: 75%;
+	}
+	.field-name {
+		margin-right: 20px;
+	    font-size: 25px;
+	    color: #FF9E51;
+	    width: 100px;
+		text-align: right;
+	}
+	.field-name.input-has-error {
+		color: red;
+	}
+
+	.mdl-textfield {
+		padding: 0;
+		/*margin-bottom: 20px;*/
+	}
+	.input-has-error.mdl-textfield__input {
+		border-bottom: 2px solid red !important;
+	}
+	.field-input.is-focused > .mdl-textfield__input  {
+		border-color: #FF9E51;
+	}
+
+	#form-body {
+		margin-bottom: 27px
+	}
+	#submit {
+   		font-size: 30px;
+	    padding: 20px;
+	    margin-bottom: 12px;
+	    background-color: transparent;
+	    border: none;
+	    transition: background-color 0.3s ease-out;
+	}
+
+	#submit:hover {
+		background-color: rgba(158, 158, 158, 0.2);
+	}
+	#submit .mdl-spinner {
+		width: 25px;
+		height: 25px;
+	}
+	#form-error-message {
+		color: red;
+	}
+	
+	#profile #reCAPTCHA {
+		margin: 75px auto 30px auto;
+		width: 304px;
+	}
+	#profile #reCAPTCHA.warn {
+		border: 3px solid red;
+	}
+	#register-form {
+		padding-top: 50px;
+	}
+	
+	@media screen and (max-width: 600px) {
+	    .field-name , .field-input>.mdl-textfield__input {
+	    	text-align: center;
+	    }
+	}

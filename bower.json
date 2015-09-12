@@ -28,7 +28,8 @@
     "angular-route": "~1.4.5",
     "angular-sanitize": "~1.4.5",
     "material-design-lite": "~1.0.4",
-    "normalize.css": "~3.0.3"
+    "normalize.css": "~3.0.3",
+    "angular-recaptcha": "~2.2.5"
   },
   "resolutions": {
     "angular": "1.4.5",
