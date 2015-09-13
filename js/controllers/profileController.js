@@ -35,7 +35,7 @@ angular
 
 		if( form.$valid && User.checkProfileUpdated($scope.profile) ){
 			$scope.submissionStatus = 'pending';
-
+			componentHandler.upgradeDom(); // Reset material Progress Spinner	
 			User.setProfile($scope.profile).then(function () {
 				$scope.submissionStatus = 'done';
 			});	

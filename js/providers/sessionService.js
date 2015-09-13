@@ -6,6 +6,8 @@ angular
 	this.fb_token = $cookieStore.get('fb_token');
 
 	this.store = function (webToken, fbToken) {
+		console.log("Setting web token: ", webToken );
+		console.log("Setting fb token: ", fbToken );
 		this.token = webToken;
 		this.fb_token = fbToken;
 		$cookieStore.put('token',webToken);

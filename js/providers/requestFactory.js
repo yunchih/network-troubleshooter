@@ -6,7 +6,7 @@ angular
 	var api = API.api;
 	
 	var appendAccessToken = function (data) {
-		data.acces_token = Session.token;
+		data.access_token = Session.token;
         return data;
 	};
 
@@ -18,17 +18,17 @@ angular
 		});
 	};
 
-	var POST_request = function (url_body, data) {
+	var POST_request = function (url_body, data, token_not_required) {
 		return $http({
 			method: 'POST',
 			url: apiBase + '/' + url_body,
-			params: appendAccessToken(data)
+			params: token_not_required ? data : appendAccessToken(data)
 		});
 	};
 
 	return {
 		login: function (userCredential) {
-			return POST_request( api.Login, userCredential );
+			return POST_request( api.Login, userCredential, true /* login does not require token */);
 		},
 		updateUserProfile: function (profile) {
 			return POST_request( api.UpdateUserProfile, profile );

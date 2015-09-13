@@ -31,39 +31,8 @@ angular
 
     navbarLayout[Identity.authorizedBy.Backend] = navbarLayout[Identity.authorizedBy.FB];
 
-    var loginBackend  = function(getFacebookProfilePromise, fb_access_token) {
-        return getFacebookProfilePromise.then( function (FBidentity) {
-            
-            var userFacebookCredential = {
-                access_token: fb_access_token, 
-                fb_id: FBidentity.fb_id 
-            };
-
-            if( !userFacebookCredential.access_token || !userFacebookCredential.fb_id )
-                return null;
-
-            return Request.login(userFacebookCredential).then(
-                function (response) {
-
-                    Session.store( response.access_token, fb_access_token );
-
-                    if( !response.registered ){
-                        registered = false;
-                        $location.path('termOfService');
-                    }
-                    else {
-                        registered = true;
-                        // Take the user back to where he used to be.
-                        $location.path( $rootScope.savedLocation );
-                    }
-                }, 
-                function (rejection) {
-                    console.log("Login Backend Failed! ",rejection);
-                }
-            );
-
-            /* No handler function for failure (it's been checked in previous promise chain) */
-        }, null);
+    var loginBackend  = function(getFacebookProfilePromise) {
+        return getFacebookProfilePromise
     };
     var getFacebookProfile = function () {
         return $facebook.api("/me").then(
@@ -85,26 +54,54 @@ angular
         $scope.navBar = navbarLayout[ authorizedBy ];
     };
 
+    var loginBackend = function (userFacebookCredential) {
+        return Request.login(userFacebookCredential).then(
+            function (response) {
+
+                Session.store( response.data.access_token, userFacebookCredential.access_token );
+
+                if( !response.registered ){
+                    registered = false;
+                    $location.path('termOfService');
+                }
+                else {
+                    registered = true;
+                    // Take the user back to where he used to be.
+                    $location.path( $rootScope.savedLocation );
+                }
+            },
+            function (rejection) {
+                console.log("Login Backend Failed! ",rejection);
+            }
+        );
+    };
+
     this.agreeTermOfService = false;
 
-    this.login = function ($scope, fb_access_token) {
-        var promise = getFacebookProfile().then(
+    this.login = function ($scope) {
+        var loginPromise = getFacebookProfile().then(
             function (FBidentity) {
                 setCurrentUser($scope, FBidentity);
-                console.log("FB access token", $facebook.getAuthResponse());
-                console.log("FB access token from session: ",Session.fb_token, Session.token);
-                return FBidentity;
+
+                var FacebookAuthResponse = $facebook.getAuthResponse();
+                var userFacebookCredential = {
+                    access_token: FacebookAuthResponse.accessToken,
+                    fb_id: FacebookAuthResponse.userID 
+                };
+
+                if( !userFacebookCredential.access_token || !userFacebookCredential.fb_id )
+                    return $q.reject();
+
+                console.log("User credential", userFacebookCredential);
+                return loginBackend(userFacebookCredential);
             },
             function () {
                 setCurrentUser($scope, {});
+                return $q.reject();
             }
         );
-
         
-
-        fb_access_token = fb_access_token || Session.fb_token;
-
-        return loginBackend( promise, fb_access_token );
+        return loginPromise;
     };
 
     this.logout = function () {
