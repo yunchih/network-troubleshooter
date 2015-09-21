@@ -31,7 +31,7 @@
     }
     #guide {
         z-index: 2;
-        background-color: rgba(58, 54, 54, 0.91);;
+        background-color: rgba(58, 54, 54, 0.91);
         color: white;
 
     }
@@ -96,8 +96,9 @@
     </div>
     <table class="mdl-data-table mdl-js-data-table mdl-data-table--selectable enquiry-table" >
     <tbody>
-        <tr ng-repeat=" ( index, enquiry ) in enquiryHistory" >
-            <td class="mdl-data-table__cell--non-numeric  enquiry-title enquiry-history-title" ng-click="historyBacktrack(index)">
+        <tr ng-repeat=" ( index, enquiry ) in enquiry.historyList" >
+            <td class="mdl-data-table__cell--non-numeric  enquiry-title enquiry-history-title" 
+                ng-click="historyBacktrack(index)">
                 <span class="history-question">
                 {{ enquiry.title }}
                 </span>
@@ -106,18 +107,18 @@
         </tr>
         <tr>
             <td class="mdl-data-table__cell--non-numeric">
-                <div id="{{ currentEnquiryID }}" class="enquiry-title">
+                <div id="{{ enquiry.currentID }}" class="enquiry-title">
                     <span >
-                    {{ currentEnquiry.title }}
+                    {{ enquiry.current.title }}
                     </span>
                 </div>
                 
                 <!-- Guide description -->
-                <div class="enquiry-description" ng-bind-html="currentEnquiry.enquiry" ></div>
+                <div class="enquiry-description" ng-bind-html="enquiry.current.enquiry" ></div>
                 
                 <!-- Optional: A list of guides -->
                 <div class="guides">
-                    <div ng-repeat="guide in currentEnquiry.guides">
+                    <div ng-repeat="guide in enquiry.current.guides">
                         <button class="mdl-button mdl-js-button mdl-js-ripple-effect mdl-button--primary"
                                 ng-click="showGuide( guide )">
                             {{ guide.name }}
@@ -127,9 +128,9 @@
 
                 <!-- Prompt -->
                 <div class="answers">
-                    <div class="answer animation-fadeIn" ng-repeat="(index, situation) in currentEnquiry.situation ">
+                    <div class="answer animation-fadeIn" ng-repeat="(index, situation) in enquiry.current.situation ">
                         <label class="mdl-radio mdl-js-radio mdl-js-ripple-effect" >
-                            <input type="radio" class="mdl-radio__button" ng-model="currentEnquiry.selected"
+                            <input type="radio" class="mdl-radio__button" ng-model="enquiry.current.selected"
                                                ng-value="{{ { index:index, next:situation.next} }}" name="next" />
                             <span class="mdl-radio__label" ng-bind-html="situation.answer"></span>
                         </label>
@@ -140,10 +141,10 @@
                 <div class="nextStep">
                     <button 
                     class="mdl-button mdl-js-button mdl-button--raised mdl-button--colored"
-                        ng-click="currentEnquiry.nextPage ? 
-                        gotoNextPage(currentEnquiry.nextPage.url) : 
-                        gotoNextEnquiry(currentEnquiry.selected.next)" >
-                        {{ currentEnquiry.nextPage.message || 'Next' }}
+                        ng-click="enquiry.current.nextPage ? 
+                        gotoNextPage(enquiry.current.nextPage.url) : 
+                        gotoNextEnquiry(enquiry.current.selected.next)" >
+                        {{ enquiry.current.nextPage.message || 'Next' }}
                     </button>
                 </div>
                             

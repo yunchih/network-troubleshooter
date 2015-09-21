@@ -83,7 +83,7 @@ angular
             function (FBidentity) {
                 setCurrentUser($scope, FBidentity);
 
-                var FacebookAuthResponse = $facebook.getAuthResponse();
+                var FacebookAuthResponse = $facebook.getAuthResponse() || {};
                 var userFacebookCredential = {
                     access_token: FacebookAuthResponse.accessToken,
                     fb_id: FacebookAuthResponse.userID 

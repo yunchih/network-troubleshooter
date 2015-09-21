@@ -35,8 +35,6 @@
 #results {
 }
 .navigation {
-	opacity: 0;
-	visibility: hidden;
 	cursor: pointer;
 	text-align: center;
 	display: flex;
@@ -45,10 +43,6 @@
 	width: 50%;
 	transition: opacity .5s, transform .1s, width .1s;
 	-webkit-transition: opacity .5s, transform .1s, width .1s;
-}
-.navigation.visible {
-	opacity: 1;
-	visibility: visible;
 }
 .navigation:hover {
 	background-color: rgba(158,158,158,0.2);
@@ -206,4 +200,18 @@
 
 #done-panel .material-icons {
 	font-size: 45px
+}
+
+#moreWords-panel {
+	text-align: center;
+	padding-top: 60px;
+}
+
+#moreWords-panel .panel-title {
+	background: none;
+	border: none;
+}
+
+#moreWords-panel textarea {
+	width: 65%;
 }

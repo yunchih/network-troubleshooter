@@ -120,7 +120,15 @@ angular
         
 .controller( "mainController", [ '$scope', '$facebook', 'User', 'Session', function( $scope, $facebook, User, Session ){
 
-    $scope.enquiryHistory = [];
+    $scope.resetTroubleshooter = function () {
+        $scope.enquiry = {
+            historyList: [],
+            currentID: 'issue',
+            current: model.issueList[ 'issue' ]
+        };
+    };
+
+    $scope.resetTroubleshooter();
 
     User.login($scope).then(function () {
         console.log("Current User: ", $scope.currentUser);

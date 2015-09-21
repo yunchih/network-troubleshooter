@@ -15,7 +15,7 @@
 		</div>
 		<div id="result-footer" >
 			<div 
-				ng-class="{ visible: getPrevious(), hovered: previousHovered }"
+				ng-class="{ hovered: previousHovered }"
 				ng-click="gotoPreviousResult()" 
 				ng-mouseover="previousHovered = true" 
 				ng-mouseleave="previousHovered = false"
@@ -27,7 +27,7 @@
 				
 			</div>
 			<div 
-				ng-class="{ visible: getNext(), hovered: nextHovered }"
+				ng-class="{ hovered: nextHovered }"
 				ng-click="gotoNextResult()" 
 				ng-mouseover="nextHovered = true" 
 				ng-mouseleave="nextHovered = false"
@@ -50,11 +50,13 @@
 	</h3>
 	<div class="panel-description">
 			<table ng-show="enquiryExportResult.length" class="mdl-data-table mdl-js-data-table mdl-data-table--selectable mdl-shadow--2dp">
-				<!-- <div id="table-header">
+				<!-- 
+				<div id="table-header">
 					<thead>
 						<tr><td>疑難排解報告</td><td></td></tr>
 					</thead>
-				</div> -->
+				</div> 
+				-->
 					
 				<tbody>
 					<tr ng-repeat="enquiry in enquiryExportResult">
@@ -64,7 +66,7 @@
 				</tbody>
 		    </table>
 
-			<h3 id="noTroubleshootNotice" ng-hide="enquiryExportResult.length">您尚未進行疑難排解</h3>
+			<h3 id="noTroubleshootNotice" ng-hide="enquiry.historyList.length">您尚未進行疑難排解</h3>
 	</div>
 </div>
 	
@@ -131,6 +133,29 @@
 </div>
 
 
+</script>
+
+<script type="text/ng-template" id="moreWords">
+<div class="result" id="moreWords-panel">
+	<h3 class="panel-title">
+		還有什麼話想跟我們說？
+	</h3>
+	<div class="panel-description">
+		<textarea type="text" rows="4" cols="10"></textarea>
+	</div>
+	<h3 class="panel-title">
+		另外，想確認你是不是機器人…
+	</h3>
+	<div class="panel-description">
+		<div id="reCAPTCHA" 
+			vc-recaptcha 
+			key="'6LftjwwTAAAAAM8uKkShi-RbeZJhgEfamJCrRkJ4'" 
+			ng-class="{ 'warn': warnCAPTCHA }"
+			on-success="setCAPTCHA(response)"
+			on-expire="CAPTCHAexpired()"
+		></div>
+	</div>
+</div>
 </script>
 
 <script type="text/ng-template" id="done">

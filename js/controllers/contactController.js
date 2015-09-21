@@ -1,14 +1,28 @@
 angular
 .module( "networkTroubleshooter")
-.controller( "contactController", function( $scope ){
+.controller( "contactController", function( $scope, $location ){
+
+    var first = { 
+        title: '重新進行疑難排解',
+        action: function () {
+            
+            $scope.resetTroubleshooter();
+
+            $location.path('troubleshooter');
+        }
+    };
+
+    var last = {
+        title: '完成',
+        action: function () {
+            $location.path('/');
+        }
+    };
+
     /* A list of necessary result entry used in contact page */
     /* The name of entry must correspond to id of its ng-template */
+
     $scope.resultEntries = [
-        { 
-            id: 'redo',
-            title: '重新進行疑難排解',
-            action: 'troubleshoot'
-        },
         { 
             id: 'report',
             title: '疑難排解報告'
@@ -22,9 +36,8 @@ angular
             title: '聯絡方式'
         },
         {
-            id: 'done',
-            title: '完成',
-            action: 'send'
+            id: 'moreWords',
+            title: '想跟我們說的話'
         }
     ];
 
@@ -32,32 +45,49 @@ angular
 
     var resultNumber = $scope.resultEntries.length;
     
-    var doAction = function () {
-        // Check if there's any action to be done
-        // when we enter a new page.
-        if( $scope.resultEntries[$scope.resultIndex].action ){
-            actions[ $scope.resultEntries[$scope.resultIndex].action ]();
-        }
-    }
     $scope.gotoNextResult = function () {
-        doAction();  
-        $scope.resultIndex = $scope.resultIndex + 1;
+        if( $scope.resultIndex != resultNumber - 1 )
+            $scope.resultIndex = $scope.resultIndex + 1;
+        else
+            last.action();
+
+        setTimeout( function () {
+               window.componentHandler.upgradeDom();
+            } , 100 );
+
     };
     $scope.gotoPreviousResult = function () {
-        doAction();        
-        $scope.resultIndex = $scope.resultIndex - 1;
+        if( $scope.resultIndex != 0 )
+            $scope.resultIndex = $scope.resultIndex - 1;
+        else
+            first.action();
+
+        setTimeout( function () {
+               window.componentHandler.upgradeDom();
+            } , 100 );
+        
     };
     $scope.getPrevious = function () {
         if( $scope.resultIndex != 0 )
             return $scope.resultEntries[$scope.resultIndex - 1].title;
         else
-            return null;
+            return first.title;
     };
     $scope.getNext = function () {
         if( $scope.resultIndex != resultNumber - 1 )
             return $scope.resultEntries[$scope.resultIndex + 1].title;
         else
-            return null;
-        
+            return last.title;
     };
+
+    $scope.setCAPTCHA = function (res) {
+        $scope.profile.recaptcha = res;
+        $scope.warnCAPTCHA = false;
+    };
+    $scope.CAPTCHAexpired = function() {
+        $scope.profile.recaptcha = '';
+        $scope.warnCAPTCHA = true;
+    };
+
+
 });

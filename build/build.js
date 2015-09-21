@@ -772,7 +772,15 @@ angular
         
 .controller( "mainController", [ '$scope', '$facebook', 'User', 'Session', function( $scope, $facebook, User, Session ){
 
-    $scope.enquiryHistory = [];
+    $scope.resetTroubleshooter = function () {
+        $scope.enquiry = {
+            historyList: [],
+            currentID: 'issue',
+            current: model.issueList[ 'issue' ]
+        };
+    };
+
+    $scope.resetTroubleshooter();
 
     User.login($scope).then(function () {
         console.log("Current User: ", $scope.currentUser);
@@ -872,6 +880,7 @@ angular
   notAuthenticated: 'auth-not-authenticated',
   notAuthorized: 'auth-not-authorized'
 });
+
 angular
 .module( "networkTroubleshooter")
 .factory('Request',['$http', 'API', 'Session', function($http, API, Session){
@@ -945,6 +954,7 @@ angular
 	};
 		
 });
+
 angular
 .module( "networkTroubleshooter")
 .service('User', 
@@ -1030,7 +1040,7 @@ angular
             function (FBidentity) {
                 setCurrentUser($scope, FBidentity);
 
-                var FacebookAuthResponse = $facebook.getAuthResponse();
+                var FacebookAuthResponse = $facebook.getAuthResponse() || {};
                 var userFacebookCredential = {
                     access_token: FacebookAuthResponse.accessToken,
                     fb_id: FacebookAuthResponse.userID 
@@ -1110,15 +1120,29 @@ angular
 
 angular
 .module( "networkTroubleshooter")
-.controller( "contactController", function( $scope ){
+.controller( "contactController", function( $scope, $location ){
+
+    var first = { 
+        title: '重新進行疑難排解',
+        action: function () {
+            
+            $scope.resetTroubleshooter();
+
+            $location.path('troubleshooter');
+        }
+    };
+
+    var last = {
+        title: '完成',
+        action: function () {
+            $location.path('/');
+        }
+    };
+
     /* A list of necessary result entry used in contact page */
     /* The name of entry must correspond to id of its ng-template */
+
     $scope.resultEntries = [
-        { 
-            id: 'redo',
-            title: '重新進行疑難排解',
-            action: 'troubleshoot'
-        },
         { 
             id: 'report',
             title: '疑難排解報告'
@@ -1132,9 +1156,8 @@ angular
             title: '聯絡方式'
         },
         {
-            id: 'done',
-            title: '完成',
-            action: 'send'
+            id: 'moreWords',
+            title: '想跟我們說的話'
         }
     ];
 
@@ -1142,34 +1165,51 @@ angular
 
     var resultNumber = $scope.resultEntries.length;
     
-    var doAction = function () {
-        // Check if there's any action to be done
-        // when we enter a new page.
-        if( $scope.resultEntries[$scope.resultIndex].action ){
-            actions[ $scope.resultEntries[$scope.resultIndex].action ]();
-        }
-    }
     $scope.gotoNextResult = function () {
-        doAction();  
-        $scope.resultIndex = $scope.resultIndex + 1;
+        if( $scope.resultIndex != resultNumber - 1 )
+            $scope.resultIndex = $scope.resultIndex + 1;
+        else
+            last.action();
+
+        setTimeout( function () {
+               window.componentHandler.upgradeDom();
+            } , 100 );
+
     };
     $scope.gotoPreviousResult = function () {
-        doAction();        
-        $scope.resultIndex = $scope.resultIndex - 1;
+        if( $scope.resultIndex != 0 )
+            $scope.resultIndex = $scope.resultIndex - 1;
+        else
+            first.action();
+
+        setTimeout( function () {
+               window.componentHandler.upgradeDom();
+            } , 100 );
+        
     };
     $scope.getPrevious = function () {
         if( $scope.resultIndex != 0 )
             return $scope.resultEntries[$scope.resultIndex - 1].title;
         else
-            return null;
+            return first.title;
     };
     $scope.getNext = function () {
         if( $scope.resultIndex != resultNumber - 1 )
             return $scope.resultEntries[$scope.resultIndex + 1].title;
         else
-            return null;
-        
+            return last.title;
     };
+
+    $scope.setCAPTCHA = function (res) {
+        $scope.profile.recaptcha = res;
+        $scope.warnCAPTCHA = false;
+    };
+    $scope.CAPTCHAexpired = function() {
+        $scope.profile.recaptcha = '';
+        $scope.warnCAPTCHA = true;
+    };
+
+
 });
 angular
 .module( "networkTroubleshooter")
@@ -1268,10 +1308,10 @@ angular
     // Export the enquiry
     
     var enquiry;
-    var length = $scope.enquiryHistory.length;
-    enquiryExport = [];
+    var length = $scope.enquiry.historyList.length;
+    var enquiryExport = [];
     for (var i = 0; i < length ; i++) {
-         enquiry = enquiryHistory[i];
+         enquiry = $scope.enquiry.historyList[i];
          enquiryExport.push( {
             question: enquiry.title,
             answer: enquiry.situation[ enquiry.selected.index ].answer
@@ -1369,32 +1409,31 @@ angular
 .module( "networkTroubleshooter")
 .controller( "troubleshooterController", function( $scope, $location ){
 
-    $scope.currentEnquiry = model.issueList.issue;
-    $scope.currentEnquiryID = 'issue';
-
     $scope.gotoNextPage = function (url) {
         $location.path(url);
     };
 
-    $scope.gotoNextEnquiry = function ( next ){	
+    $scope.gotoNextEnquiry = function ( next ){
         if( next ){
-            $scope.enquiryHistory.push($scope.currentEnquiry);
-            $scope.currentEnquiryID = next;
-            $scope.currentEnquiry = model.issueList[ next ];
+            $scope.enquiry.historyList.push( $scope.enquiry.current );
+            $scope.enquiry.currentID = next;
+            $scope.enquiry.current = model.issueList[ next ];
             setTimeout( function () {
                window.componentHandler.upgradeDom();
             } , 100 );
+
+            console.log("Current Enquiry: " , $scope.enquiry.currentID);
+
         }
     };
 
     $scope.historyBacktrack = function ( index ){
-        $scope.currentEnquiry = $scope.enquiryHistory[index];
-        $scope.enquiryHistory = $scope.enquiryHistory.slice( 0, index );
+        $scope.enquiry.current = $scope.enquiry.historyList[index];
+        $scope.enquiry.historyList = $scope.enquiry.historyList.slice( 0, index );
         window.setTimeout(  window.componentHandler.upgradeDom, 100 );
     };
 
     $scope.showGuide = function (guide) {
-        console.log("Show guide");
         $scope.guide_url = 'partials/' +  guide.url ;
         $scope.guide_name = guide.name;
     };

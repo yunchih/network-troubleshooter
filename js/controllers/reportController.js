@@ -6,10 +6,10 @@ angular
     // Export the enquiry
     
     var enquiry;
-    var length = $scope.enquiryHistory.length;
-    enquiryExport = [];
+    var length = $scope.enquiry.historyList.length;
+    var enquiryExport = [];
     for (var i = 0; i < length ; i++) {
-         enquiry = enquiryHistory[i];
+         enquiry = $scope.enquiry.historyList[i];
          enquiryExport.push( {
             question: enquiry.title,
             answer: enquiry.situation[ enquiry.selected.index ].answer
